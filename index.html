@@ -357,17 +357,21 @@
             }
 
             .fuji-title {
-                width: 72%;
+                width: 87%;
                 min-width: 180px;
-                top: 12%;
-                left: 4%;
-                transform: none !important;
+                top: 42%;
+                left: 5%;
+                z-index: 3;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             .fuji-bg {
-                top: 30%;
-                height: 100%;
-                transform: translateY(-20%) !important;
+                top: -60%;
+                height: 160%;
+                transform: scale(1);
+                transform-origin: top;
+                will-change: transform;
             }
 
             /* --- Tokyo --- */
@@ -376,31 +380,54 @@
             }
 
             .tokyo-streets {
-                height: 110%;
-                top: 0;
-                transform: none !important;
+                position: absolute;
+                width: 171% !important;
+                height: 139% !important;
+                left: 0% !important;
+                top: 5% !important;
+                /* object-fit: cover; */
+                /* object-position: center bottom; */
+                z-index: 5;
+                transform: translateY(calc(var(--tokyo-scroll) * 0.003px));
+                will-change: transform;
+                pointer-events: none;
             }
 
             .tokyo-tower {
-                height: 65%;
-                left: 2%;
-                top: 15%;
-                transform: none !important;
+                position: absolute;
+                height: 97% !important;
+                left: -15% !important;
+                top: -1% !important;
+                rotate: -2deg !important;
+                z-index: 4 !important;
+                transform: translateY(calc(var(--tokyo-scroll) * -0.02px)) !important;
+                will-change: transform;
+                pointer-events: none;
             }
 
             .tokyo-gundam {
-                height: 80%;
-                right: -4%;
-                bottom: 0;
-                transform: none !important;
+                position: absolute;
+                height: 100% !important;
+                right: -95% !important;
+                bottom: -4% !important;
+                z-index: 3;
+                transform: translateY(calc(var(--tokyo-scroll) * -0.08px));
+                will-change: transform;
+                pointer-events: none;
             }
 
             .tokyo-title {
-                width: 58%;
-                min-width: 160px;
-                top: 4%;
-                left: 50%;
-                transform: translateX(-50%) !important;
+                position: absolute;
+                width: 30%;
+                min-width: 220px;
+                top: 24% !important;
+                left: 57% !important;
+                transform: translateX(-50%) translateY(calc(var(--tokyo-scroll) * -0.06px));
+                z-index: 4;
+                filter: drop-shadow(0 4px 30px rgba(255, 255, 255, 0.8));
+                will-change: transform;
+                pointer-events: none;
+                rotate: 90deg;
             }
 
             /* --- Sapporo --- */
@@ -897,9 +924,33 @@
             { selector: '.layer-title', speed: -0.18 },
         ];
 
+        const mobileFujiLayers = [
+            { selector: '.fuji-title', type: 'translateY', speed: -0.18 },
+            { selector: '.fuji-bg', type: 'scale', speed: 0.0004 }, // zoom in
+        ];
+
+        const mobileFujiEls = mobileFujiLayers.map(({ selector, type, speed }) => ({
+            el: document.querySelector(selector),
+            type,
+            speed,
+        }));
+
         // Cache elements once
         const mobileLayers = mobileParallaxLayers.map(({ selector, speed }) => ({
             el: document.querySelector(selector),
+            speed,
+        }));
+
+        const mobileTokyoLayers = [
+            { selector: '.tokyo-streets', type: 'plain', speed: 0.03 }, // slow drift down (recede)
+            { selector: '.tokyo-tower', type: 'plain', speed: -0.10 }, // drifts up, feels close
+            { selector: '.tokyo-gundam', type: 'plain', speed: -0.06 }, // mid drift up
+            { selector: '.tokyo-title', type: 'translateXandY', speed: -0.08 }, // preserves translateX(-50%)
+        ];
+
+        const mobileTokyoEls = mobileTokyoLayers.map(({ selector, type, speed }) => ({
+            el: document.querySelector(selector),
+            type,
             speed,
         }));
 
@@ -919,6 +970,36 @@
 
                     mobileLayers.forEach(({ el, speed }) => {
                         if (el) el.style.transform = `translateY(${relativeScroll * speed}px)`;
+                    });
+
+                    // Fuji relative scroll
+                    const fujiSection = document.getElementById('fuji-section');
+                    const fujiStart = fujiSection ? fujiSection.offsetTop : 0;
+                    const fujiScroll = Math.max(0, scrollTop - fujiStart);
+
+                    mobileFujiEls.forEach(({ el, type, speed }) => {
+                        if (!el) return;
+                        if (type === 'translateY') {
+                            el.style.transform = `translateY(${fujiScroll * speed}px)`;
+                        } else if (type === 'scale') {
+                            const scale = 1 + fujiScroll * speed;
+                            el.style.transform = `scale(${scale})`;
+                        }
+                    });
+
+                    // Tokyo
+                    const tokyoSection = document.getElementById('tokyo-section');
+                    const tokyoStart = tokyoSection ? tokyoSection.offsetTop : 0;
+                    const tokyoScroll = Math.max(0, scrollTop - tokyoStart);
+
+                    mobileTokyoEls.forEach(({ el, type, speed }) => {
+                        if (!el) return;
+                        if (type === 'translateXandY') {
+                            // title needs translateX(-50%) preserved alongside the Y movement
+                            el.style.transform = `translateX(-50%) translateY(${-tokyoScroll * speed}px)`;
+                        } else {
+                            el.style.transform = `translateY(${tokyoScroll * speed}px)`;
+                        }
                     });
 
                     mobileTicking = false;
