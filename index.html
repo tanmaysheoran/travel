@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japan</title>
+    <link rel="preload" href="content/hero.jpg" as="image">
+    <link rel="preload" href="content/kyoto/slice1.svg" as="image">
+    <link rel="preload" href="content/kyoto/lamps.svg" as="image">
+    <link rel="preload" href="content/kyoto/slice2.svg" as="image">
+    <link rel="preload" href="content/kyoto/town.svg" as="image">
+    <link rel="preload" href="content/kyoto/title.svg" as="image">
+    <link rel="preload" href="content/mountfuji/title.svg" as="image">
+    <link rel="preload" href="content/mountfuji/mtfuji.jpg.svg" as="image">
+    <link rel="preload" href="content/tokyo/streets.svg" as="image">
+    <link rel="preload" href="content/tokyo/tokyo-tower.svg" as="image">
+    <link rel="preload" href="content/tokyo/gundam.svg" as="image">
+    <link rel="preload" href="content/tokyo/title.svg" as="image">
+    <link rel="preload" href="content/sapporo/sea.svg" as="image">
+    <link rel="preload" href="content/sapporo/buddha.svg" as="image">
+    <link rel="preload" href="content/sapporo/title.svg" as="image">
+    <link rel="preload" href="content/osaka/lanterns.svg" as="image">
+    <link rel="preload" href="content/osaka/gate.svg" as="image">
+    <link rel="preload" href="content/osaka/castle.svg" as="image">
+    <link rel="preload" href="content/osaka/title.svg" as="image">
+
+    <style>
+        :root {
+            --bg-color: #f8f8f8;
+            --text-color: #1a1a1a;
+            --accent-color: #e63946;
+            --frame-width: 40px;
+            --kyoto-scroll: 0;
+            --fuji-scroll: 0;
+            --tokyo-scroll: 0;
+            --sapporo-scroll: 0;
+            --osaka-scroll: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f8f8;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+
+        #loader p {
+            color: #ccc;
+            letter-spacing: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .main-scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-image {
+            width: 80%;
+            max-width: 900px;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.1));
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 200;
+            letter-spacing: 1.2rem;
+            margin-top: 40px;
+            color: #222;
+            text-transform: uppercase;
+        }
+
+        /* ===== Kyoto Parallax Section ===== */
+        .kyoto-wrapper {
+            position: relative;
+            height: 300vh;
+            background: #1a1a1a;
+        }
+
+        .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .frame-outer {
+            position: relative;
+            width: 90vw;
+            height: 80vh;
+            background: white;
+            padding: var(--frame-width);
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .frame-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #f0ede8;
+            overflow: hidden;
+        }
+
+        /* Shared parallax layer base */
+        .parallax-layer {
+            position: absolute;
+            will-change: transform;
+            pointer-events: none;
+            transition: none;
+        }
+
+        /* 
+         * Layer order (back to front) matching the reference:
+         * 1. slice1 (torii gate) — far background left, small
+         * 2. lamps (red lanterns) — upper-left, mid-ground
+         * 3. slice2 (pagoda + cherry blossoms) — upper-right, mid-ground
+         * 4. town (grayscale street) — bottom foreground, full width
+         * 5. title (京都 kyoto) — bottom-left overlay text
+         */
+
+        /* === Layer 1: Torii Gate — Far background, left side === */
+        .layer-slice1 {
+            width: 90%;
+            left: 0%;
+            top: 0%;
+            z-index: 1;
+            /* opacity: 0.7; */
+            /* mix-blend-mode: multiply; */
+            transform: translateY(calc(var(--kyoto-scroll) * -0.08px));
+        }
+
+        /* === Layer 2: Red Lanterns — Upper left, overlapping torii === */
+        .layer-lamps {
+            width: 43%;
+            left: 27%;
+            top: 18%;
+            z-index: 2;
+            /* mix-blend-mode: multiply; */
+            transform: translateY(calc(var(--kyoto-scroll) * -0.15px));
+        }
+
+        /* === Layer 3: Pagoda + Cherry Blossoms — Upper right === */
+        .layer-slice2 {
+            width: 100%;
+            right: 0%;
+            top: -10%;
+            z-index: 4;
+            /* mix-blend-mode: multiply; */
+            transform: translateY(calc(var(--kyoto-scroll) * -0.12px));
+        }
+
+        /* === Layer 4: Town Street — Foreground, full-width bottom === */
+        .layer-town {
+            width: 105%;
+            left: -5%;
+            bottom: -17%;
+            z-index: 4;
+            /* mix-blend-mode: normal; */
+            transform: translateY(calc(var(--kyoto-scroll) * -0.03px));
+        }
+
+        /* === Layer 5: Title (京都 kyoto) — Bottom-left text === */
+        .layer-title {
+            position: absolute;
+            width: 30%;
+            min-width: 180px;
+            bottom: 5%;
+            left: 3%;
+            z-index: 5;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.6));
+            transform: translateY(calc(var(--kyoto-scroll) * 0.04px));
+        }
+
+        /* Vignette overlay for cinematic depth */
+        .frame-inner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                    transparent 50%,
+                    rgba(0, 0, 0, 0.15) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* ===== Mount Fuji Parallax Section ===== */
+        .fuji-wrapper {
+            position: relative;
+            height: 400vh;
+            background: #f8f8f8;
+        }
+
+        .fuji-wrapper .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background: white;
+        }
+
+        .fuji-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Mt. Fuji background photo — sits on TOP to mask the title */
+        .fuji-bg {
+            position: absolute;
+            width: 100%;
+            height: 130%;
+            left: 0;
+            top: 68%;
+            z-index: 2;
+            object-fit: cover;
+            object-position: center 20%;
+            transform: translateY(calc(-50% + var(--fuji-scroll) * -0.08px));
+            will-change: transform;
+        }
+
+        /* Mt. Fuji title — starts BEHIND the photo, revealed as photo scrolls up */
+        .fuji-title {
+            position: absolute;
+            width: 45%;
+            min-width: 280px;
+            top: 50%;
+            left: 5%;
+            z-index: 1;
+            transform: translateY(calc(var(--fuji-scroll) * -0.4px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .fuji-title {
+                width: 70%;
+                min-width: 180px;
+                top: 10%;
+                left: 3%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .frame-outer {
+                width: 95vw;
+                height: 70vh;
+                padding: 15px;
+            }
+
+            .layer-title {
+                width: 50%;
+                min-width: 120px;
+            }
+
+            .layer-lamps {
+                width: 65%;
+            }
+
+            .layer-slice2 {
+                width: 75%;
+            }
+
+            .layer-slice1 {
+                width: 40%;
+            }
+        }
+
+        /* ===== Tokyo Parallax Section ===== */
+        .tokyo-wrapper {
+            position: relative;
+            height: 300vh;
+            background: #dce8f0;
+        }
+
+        .tokyo-wrapper .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background: #dce8f0;
+        }
+
+        .tokyo-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* === Tokyo Layer 1: Streets — full-screen base === */
+        .tokyo-streets {
+            position: absolute;
+            width: 100%;
+            height: 128%;
+            left: 0%;
+            top: 5%;
+            /* object-fit: cover; */
+            /* object-position: center bottom; */
+            z-index: 5;
+            transform: translateY(calc(var(--tokyo-scroll) * 0.003px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Tokyo Layer 2: Tokyo Tower — left side === */
+        .tokyo-tower {
+            position: absolute;
+            height: 77%;
+            left: 11%;
+            top: 6%;
+            rotate: 3deg;
+            z-index: 2;
+            transform: translateY(calc(var(--tokyo-scroll) * -0.02px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Tokyo Layer 3: Gundam — right foreground === */
+        .tokyo-gundam {
+            position: absolute;
+            height: 100%;
+            right: -8%;
+            bottom: -4%;
+            z-index: 3;
+            transform: translateY(calc(var(--tokyo-scroll) * -0.08px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Tokyo Layer 4: Title (東京 tokyo) — top-center === */
+        .tokyo-title {
+            position: absolute;
+            width: 23%;
+            /* min-width: 220px; */
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%) translateY(calc(var(--tokyo-scroll) * -0.06px));
+            z-index: 4;
+            filter: drop-shadow(0 4px 30px rgba(255, 255, 255, 0.8));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* Vignette for Tokyo */
+        .tokyo-scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.18) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .tokyo-title {
+                width: 55%;
+                min-width: 160px;
+                top: 3%;
+            }
+
+            .tokyo-tower {
+                height: 85%;
+            }
+
+            .tokyo-gundam {
+                height: 90%;
+            }
+        }
+
+        /* ===== Sapporo Parallax Section ===== */
+        .sapporo-wrapper {
+            position: relative;
+            height: 300vh;
+            background: #dcdcea;
+        }
+
+        .sapporo-wrapper .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background: #dcdcea;
+        }
+
+        .sapporo-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* === Sapporo Layer 1: Sea === */
+        .sapporo-sea {
+            position: absolute;
+            width: 105%;
+            left: -2.5%;
+            bottom: -5%;
+            z-index: 1;
+            transform: translateY(calc(var(--sapporo-scroll) * 0.02px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Sapporo Layer 2: Buddha === */
+        .sapporo-buddha {
+            position: absolute;
+            /* height: 145%; */
+            /* width: 100%; */
+            left: 50%;
+            /* bottom: -43%; */
+            z-index: 2;
+            transform: translateX(-50%) translateY(calc(var(--sapporo-scroll) * -0.06px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Sapporo Layer 3: Title === */
+        .sapporo-title {
+            position: absolute;
+            width: 28%;
+            top: 23%;
+            left: -3%;
+            transform: translateY(-50%) translateX(calc(var(--sapporo-scroll) * 0.5px));
+            z-index: 1;
+            filter: drop-shadow(0 4px 30px rgba(255, 255, 255, 0.8));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        .sapporo-scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.2) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .sapporo-title {
+                width: 60%;
+                top: 5%;
+            }
+
+            .sapporo-buddha {
+                height: 80%;
+            }
+        }
+
+        /* ===== Osaka Parallax Section ===== */
+        .osaka-wrapper {
+            position: relative;
+            height: 300vh;
+            background: #111;
+        }
+
+        .osaka-wrapper .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .osaka-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* === Osaka Layer 1: Lanterns === */
+        .osaka-lanterns {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            top: -5%;
+            z-index: 2;
+            transform: translateY(calc(var(--osaka-scroll) * 0.03px));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Osaka Layer 2: Gate === */
+        .osaka-gate {
+            position: absolute;
+            height: 85%;
+            right: -2%;
+            bottom: 0%;
+            z-index: 1;
+
+            transform:
+                translateY(calc(var(--osaka-scroll) * -0.003px)) scale(calc(1 + var(--osaka-scroll) * 0.0008));
+
+            transform-origin: bottom right;
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Osaka Layer 3: Title === */
+        .osaka-title {
+            position: absolute;
+            width: 38%;
+            top: 28%;
+            left: 48%;
+            z-index: 3;
+            transform: translateY(calc(var(--osaka-scroll) * -0.08px));
+            filter: drop-shadow(0 4px 30px rgba(0, 0, 0, 0.6));
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        /* === Osaka Layer 4: Castle === */
+        .osaka-castle {
+            position: absolute;
+            height: 95%;
+            left: -2%;
+            bottom: -5%;
+            z-index: 4;
+            transform: translateY(calc(var(--osaka-scroll) * -0.005px));
+            will-change: transform;
+            pointer-events: none;
+            filter: drop-shadow(15px 0 30px rgba(0, 0, 0, 0.7));
+        }
+
+        .osaka-scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.35) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .osaka-title {
+                width: 65%;
+                top: 35%;
+                left: 35%;
+            }
+
+            .osaka-castle {
+                height: 75%;
+                left: -10%;
+                bottom: -2%;
+            }
+
+            .osaka-gate {
+                height: 65%;
+                right: -10%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader">
+        <p>読み込み中</p>
+    </div>
+
+    <div class="main-scroll-container" id="scroll-root">
+        <!-- Hero -->
+        <section class="hero">
+            <img src="content/hero.jpg" class="hero-image" alt="Japan">
+            <h1 class="hero-title">日本の旅</h1>
+        </section>
+
+        <!-- Kyoto Section -->
+        <section class="kyoto-wrapper">
+            <div class="sticky-container">
+                <div class="frame-inner">
+                    <!-- Layer 1: Torii Gate (far background) -->
+                    <img src="content/kyoto/slice1.svg" class="parallax-layer layer-slice1" alt="">
+
+                    <!-- Layer 2: Red Lanterns (mid-ground left) -->
+                    <img src="content/kyoto/lamps.svg" class="parallax-layer layer-lamps" alt="">
+
+                    <!-- Layer 3: Pagoda + Cherry Blossoms (mid-ground right) -->
+                    <img src="content/kyoto/slice2.svg" class="parallax-layer layer-slice2" alt="">
+
+                    <!-- Layer 4: Town Street (foreground) -->
+                    <img src="content/kyoto/town.svg" class="parallax-layer layer-town" alt="">
+
+                    <!-- Layer 5: Title -->
+                    <img src="content/kyoto/title.svg" class="layer-title" alt="Kyoto">
+                </div>
+            </div>
+        </section>
+
+        <section class="fuji-wrapper" id="fuji-section">
+            <div class="sticky-container">
+                <div class="fuji-scene">
+                    <!-- Title: sits behind the photo, revealed on scroll -->
+                    <img src="content/mountfuji/title.svg" class="fuji-title" alt="富士山 Mount Fuji">
+
+                    <!-- Photo: covers the title initially, scrolls up to reveal it -->
+                    <img src="content/mountfuji/mtfuji.jpg.svg" class="fuji-bg" alt="Mount Fuji">
+                </div>
+            </div>
+        </section>
+
+        <!-- Tokyo Section -->
+        <section class="tokyo-wrapper" id="tokyo-section">
+            <div class="sticky-container">
+                <div class="tokyo-scene">
+                    <!-- Layer 1: Streets — full-screen city background -->
+                    <img src="content/tokyo/streets.svg" class="tokyo-streets" alt="">
+
+                    <!-- Layer 2: Tokyo Tower — left landmark -->
+                    <img src="content/tokyo/tokyo-tower.svg" class="tokyo-tower" alt="">
+
+                    <!-- Layer 3: Gundam — right foreground -->
+                    <img src="content/tokyo/gundam.svg" class="tokyo-gundam" alt="">
+
+                    <!-- Layer 4: Title (東京 tokyo) -->
+                    <img src="content/tokyo/title.svg" class="tokyo-title" alt="Tokyo">
+                </div>
+            </div>
+        </section>
+
+        <!-- Sapporo Section -->
+        <section class="sapporo-wrapper" id="sapporo-section">
+            <div class="sticky-container">
+                <div class="sapporo-scene">
+                    <!-- Layer 1: Sea (background) -->
+                    <img src="content/sapporo/sea.svg" class="sapporo-sea" alt="">
+
+                    <!-- Layer 2: Buddha (foreground) -->
+                    <img src="content/sapporo/buddha.svg" class="sapporo-buddha" alt="">
+
+                    <!-- Layer 3: Title (札幌 sapporo) -->
+                    <img src="content/sapporo/title.svg" class="sapporo-title" alt="Sapporo">
+                </div>
+            </div>
+        </section>
+
+        <!-- Osaka Section -->
+        <section class="osaka-wrapper" id="osaka-section">
+            <div class="sticky-container">
+                <div class="osaka-scene">
+                    <!-- Layer 1: Lanterns (background) -->
+                    <img src="content/osaka/lanterns.svg" class="osaka-lanterns" alt="">
+
+                    <!-- Layer 2: Gate (middle right) -->
+                    <img src="content/osaka/gate.svg" class="osaka-gate" alt="">
+
+                    <!-- Layer 3: Title (Osaka) -->
+                    <img src="content/osaka/title.svg" class="osaka-title" alt="Osaka">
+
+                    <!-- Layer 4: Castle (foreground left) -->
+                    <img src="content/osaka/castle.svg" class="osaka-castle" alt="">
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom spacing for scroll -->
+        <div style="height: 50vh;"></div>
+    </div>
+
+    <script>
+        // Image Preload Logic
+        const images = document.querySelectorAll('img');
+        let loadedCount = 0;
+        const totalImages = images.length;
+        const loader = document.getElementById('loader');
+
+        function onImageLoad() {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                document.body.classList.add('loaded');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.remove();
+                    }, 400);
+                }
+            }
+        }
+
+        if (totalImages === 0) {
+            document.body.classList.add('loaded');
+            if (loader) loader.remove();
+        } else {
+            images.forEach(img => {
+                if (img.complete) {
+                    onImageLoad();
+                } else {
+                    img.addEventListener('load', onImageLoad);
+                    img.addEventListener('error', onImageLoad);
+                }
+            });
+        }
+
+        const scrollRoot = document.getElementById('scroll-root');
+
+        // Use requestAnimationFrame for smooth, jank-free parallax
+        let ticking = false;
+        document.documentElement.style.setProperty('--fuji-scroll', window.scrollY);
+        scrollRoot.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const scrollTop = scrollRoot.scrollTop;
+                    const windowHeight = window.innerHeight;
+
+                    // Calculate relative scroll for Kyoto section
+                    const kyotoStart = windowHeight; // hero is 100vh
+                    const kyotoScroll = Math.max(0, scrollTop - kyotoStart);
+                    document.documentElement.style.setProperty('--kyoto-scroll', kyotoScroll);
+
+                    // Calculate relative scroll for Mount Fuji section
+                    const fujiSection = document.getElementById('fuji-section');
+                    if (fujiSection) {
+                        const fujiStart = fujiSection.offsetTop;
+                        const fujiScroll = Math.max(0, scrollTop - fujiStart);
+                        document.documentElement.style.setProperty('--fuji-scroll', fujiScroll);
+                    }
+
+                    // Calculate relative scroll for Tokyo section
+                    const tokyoSection = document.getElementById('tokyo-section');
+                    if (tokyoSection) {
+                        const tokyoStart = tokyoSection.offsetTop;
+                        const tokyoScroll = Math.max(0, scrollTop - tokyoStart);
+                        document.documentElement.style.setProperty('--tokyo-scroll', tokyoScroll);
+                    }
+
+                    // Calculate relative scroll for Sapporo section
+                    const sapporoSection = document.getElementById('sapporo-section');
+                    if (sapporoSection) {
+                        const sapporoStart = sapporoSection.offsetTop;
+                        const sapporoScroll = Math.max(0, scrollTop - sapporoStart);
+                        document.documentElement.style.setProperty('--sapporo-scroll', sapporoScroll);
+                    }
+
+                    // Calculate relative scroll for Osaka section
+                    const osakaSection = document.getElementById('osaka-section');
+                    if (osakaSection) {
+                        const osakaStart = osakaSection.offsetTop;
+                        const osakaScroll = Math.max(0, scrollTop - osakaStart);
+                        document.documentElement.style.setProperty('--osaka-scroll', osakaScroll);
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
