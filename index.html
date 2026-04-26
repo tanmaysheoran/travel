@@ -285,39 +285,180 @@
             pointer-events: none;
         }
 
+        /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .fuji-title {
-                width: 70%;
-                min-width: 180px;
-                top: 10%;
-                left: 3%;
-            }
-        }
 
-        @media (max-width: 768px) {
+            /* --- Hero --- */
+            .hero-image {
+                width: 92%;
+            }
+
+            .hero-title {
+                font-size: 1.4rem;
+                letter-spacing: 0.6rem;
+                margin-top: 24px;
+            }
+
+            /* --- Kyoto: shorter scroll, contained frame --- */
+            .kyoto-wrapper {
+                height: 200vh;
+            }
+
             .frame-outer {
                 width: 95vw;
-                height: 70vh;
-                padding: 15px;
+                height: 72vh;
+                padding: 12px;
             }
 
-            .layer-title {
-                width: 50%;
-                min-width: 120px;
+            /* On mobile freeze all parallax layers at a good static position */
+            .layer-slice1 {
+                width: 190%;
+                left: 0;
+                top: 280px;
+                transform: none !important;
             }
 
             .layer-lamps {
-                width: 65%;
+                width: 100%;
+                left: 0%;
+                top: 50%;
+                transform: none !important;
             }
 
             .layer-slice2 {
-                width: 75%;
+                width: 102%;
+                top: 57%;
+                transform: none !important;
             }
 
-            .layer-slice1 {
-                width: 40%;
+            .layer-town {
+                width: 137%;
+                left: -3%;
+                bottom: 0%;
+                transform: none !important;
+            }
+
+            .layer-title {
+                width: 89%;
+                min-width: 120px;
+                bottom: 71%;
+                left: 12%;
+                transform: none !important;
+            }
+
+            /* --- Fuji: shorter scroll, reset positions --- */
+            .fuji-wrapper {
+                height: 220vh;
+            }
+
+            .fuji-title {
+                width: 72%;
+                min-width: 180px;
+                top: 12%;
+                left: 4%;
+                transform: none !important;
+            }
+
+            .fuji-bg {
+                top: 30%;
+                height: 100%;
+                transform: translateY(-20%) !important;
+            }
+
+            /* --- Tokyo --- */
+            .tokyo-wrapper {
+                height: 200vh;
+            }
+
+            .tokyo-streets {
+                height: 110%;
+                top: 0;
+                transform: none !important;
+            }
+
+            .tokyo-tower {
+                height: 65%;
+                left: 2%;
+                top: 15%;
+                transform: none !important;
+            }
+
+            .tokyo-gundam {
+                height: 80%;
+                right: -4%;
+                bottom: 0;
+                transform: none !important;
+            }
+
+            .tokyo-title {
+                width: 58%;
+                min-width: 160px;
+                top: 4%;
+                left: 50%;
+                transform: translateX(-50%) !important;
+            }
+
+            /* --- Sapporo --- */
+            .sapporo-wrapper {
+                height: 200vh;
+            }
+
+            .sapporo-sea {
+                width: 120%;
+                left: -10%;
+                bottom: -2%;
+                transform: none !important;
+            }
+
+            .sapporo-buddha {
+                height: 85%;
+                width: auto;
+                left: 50%;
+                bottom: -5%;
+                transform: translateX(-50%) !important;
+            }
+
+            .sapporo-title {
+                width: 62%;
+                top: 8%;
+                left: 3%;
+                transform: none !important;
+            }
+
+            /* --- Osaka --- */
+            .osaka-wrapper {
+                height: 200vh;
+            }
+
+            .osaka-lanterns {
+                width: 130%;
+                left: -15%;
+                top: -2%;
+                transform: none !important;
+            }
+
+            .osaka-gate {
+                height: 70%;
+                right: -5%;
+                bottom: 0;
+                transform: none !important;
+            }
+
+            .osaka-title {
+                width: 60%;
+                top: 8%;
+                left: 32%;
+                transform: none !important;
+            }
+
+            .osaka-castle {
+                height: 78%;
+                left: -5%;
+                bottom: -2%;
+                transform: none !important;
             }
         }
+
 
         /* ===== Tokyo Parallax Section ===== */
         .tokyo-wrapper {
@@ -408,21 +549,7 @@
             pointer-events: none;
         }
 
-        @media (max-width: 768px) {
-            .tokyo-title {
-                width: 55%;
-                min-width: 160px;
-                top: 3%;
-            }
 
-            .tokyo-tower {
-                height: 85%;
-            }
-
-            .tokyo-gundam {
-                height: 90%;
-            }
-        }
 
         /* ===== Sapporo Parallax Section ===== */
         .sapporo-wrapper {
@@ -496,16 +623,7 @@
             pointer-events: none;
         }
 
-        @media (max-width: 768px) {
-            .sapporo-title {
-                width: 60%;
-                top: 5%;
-            }
 
-            .sapporo-buddha {
-                height: 80%;
-            }
-        }
 
         /* ===== Osaka Parallax Section ===== */
         .osaka-wrapper {
@@ -593,25 +711,6 @@
                     rgba(0, 0, 0, 0.35) 100%);
             z-index: 10;
             pointer-events: none;
-        }
-
-        @media (max-width: 768px) {
-            .osaka-title {
-                width: 65%;
-                top: 35%;
-                left: 35%;
-            }
-
-            .osaka-castle {
-                height: 75%;
-                left: -10%;
-                bottom: -2%;
-            }
-
-            .osaka-gate {
-                height: 65%;
-                right: -10%;
-            }
         }
     </style>
 </head>
@@ -760,6 +859,9 @@
         let ticking = false;
         document.documentElement.style.setProperty('--fuji-scroll', window.scrollY);
         scrollRoot.addEventListener('scroll', () => {
+            // Skip parallax on mobile — CSS handles static layout instead
+            if (window.innerWidth <= 768) return;
+
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const scrollTop = scrollRoot.scrollTop;
@@ -806,6 +908,28 @@
                 ticking = true;
             }
         });
+
+        // Mobile parallax on scroll
+        // Speeds: positive = scrolls down slower (recedes), negative = scrolls up (comes forward)
+        const mobileParallaxLayers = [
+            { selector: '.layer-slice1', speed: -0.08 },
+            { selector: '.layer-lamps', speed: -0.12 },
+            { selector: '.layer-slice2', speed: -0.06 },
+            { selector: '.layer-town', speed: -0.04 },
+            { selector: '.layer-title', speed: -0.18 },
+        ];
+
+        function applyMobileParallax() {
+            const scrollY = window.scrollY;
+            mobileParallaxLayers.forEach(({ selector, speed }) => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    el.style.transform = `translateY(${scrollY * speed}px)`;
+                }
+            });
+        }
+
+        window.addEventListener('scroll', applyMobileParallax, { passive: true });
     </script>
 
 </body>
