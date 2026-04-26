@@ -310,32 +310,36 @@
                 padding: 12px;
             }
 
-            /* On mobile freeze all parallax layers at a good static position */
+            /* Mobile parallax layers - subtle scroll-driven movement */
             .layer-slice1 {
                 width: 190%;
                 left: 0;
                 top: 280px;
-                transform: none !important;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             .layer-lamps {
                 width: 100%;
                 left: 0%;
                 top: 50%;
-                transform: none !important;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             .layer-slice2 {
                 width: 102%;
                 top: 57%;
-                transform: none !important;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             .layer-town {
                 width: 137%;
                 left: -3%;
                 bottom: 0%;
-                transform: none !important;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             .layer-title {
@@ -343,7 +347,8 @@
                 min-width: 120px;
                 bottom: 71%;
                 left: 12%;
-                transform: none !important;
+                transform: translateY(0px);
+                will-change: transform;
             }
 
             /* --- Fuji: shorter scroll, reset positions --- */
@@ -832,9 +837,7 @@
                 document.body.classList.add('loaded');
                 if (loader) {
                     loader.style.opacity = '0';
-                    setTimeout(() => {
-                        loader.remove();
-                    }, 400);
+                    setTimeout(() => loader.remove(), 400);
                 }
             }
         }
@@ -855,62 +858,37 @@
 
         const scrollRoot = document.getElementById('scroll-root');
 
-        // Use requestAnimationFrame for smooth, jank-free parallax
+        // ── Desktop parallax (CSS custom properties) ──────────────────────────
         let ticking = false;
-        document.documentElement.style.setProperty('--fuji-scroll', window.scrollY);
+
         scrollRoot.addEventListener('scroll', () => {
-            // Skip parallax on mobile — CSS handles static layout instead
-            if (window.innerWidth <= 768) return;
+            if (window.innerWidth <= 768) return; // mobile handled separately
 
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const scrollTop = scrollRoot.scrollTop;
                     const windowHeight = window.innerHeight;
 
-                    // Calculate relative scroll for Kyoto section
-                    const kyotoStart = windowHeight; // hero is 100vh
-                    const kyotoScroll = Math.max(0, scrollTop - kyotoStart);
-                    document.documentElement.style.setProperty('--kyoto-scroll', kyotoScroll);
+                    const kyotoStart = windowHeight;
+                    document.documentElement.style.setProperty('--kyoto-scroll', Math.max(0, scrollTop - kyotoStart));
 
-                    // Calculate relative scroll for Mount Fuji section
-                    const fujiSection = document.getElementById('fuji-section');
-                    if (fujiSection) {
-                        const fujiStart = fujiSection.offsetTop;
-                        const fujiScroll = Math.max(0, scrollTop - fujiStart);
-                        document.documentElement.style.setProperty('--fuji-scroll', fujiScroll);
-                    }
+                    ['fuji', 'tokyo', 'sapporo', 'osaka'].forEach(id => {
+                        const el = document.getElementById(`${id}-section`);
+                        if (el) {
+                            document.documentElement.style.setProperty(
+                                `--${id}-scroll`,
+                                Math.max(0, scrollTop - el.offsetTop)
+                            );
+                        }
+                    });
 
-                    // Calculate relative scroll for Tokyo section
-                    const tokyoSection = document.getElementById('tokyo-section');
-                    if (tokyoSection) {
-                        const tokyoStart = tokyoSection.offsetTop;
-                        const tokyoScroll = Math.max(0, scrollTop - tokyoStart);
-                        document.documentElement.style.setProperty('--tokyo-scroll', tokyoScroll);
-                    }
-
-                    // Calculate relative scroll for Sapporo section
-                    const sapporoSection = document.getElementById('sapporo-section');
-                    if (sapporoSection) {
-                        const sapporoStart = sapporoSection.offsetTop;
-                        const sapporoScroll = Math.max(0, scrollTop - sapporoStart);
-                        document.documentElement.style.setProperty('--sapporo-scroll', sapporoScroll);
-                    }
-
-                    // Calculate relative scroll for Osaka section
-                    const osakaSection = document.getElementById('osaka-section');
-                    if (osakaSection) {
-                        const osakaStart = osakaSection.offsetTop;
-                        const osakaScroll = Math.max(0, scrollTop - osakaStart);
-                        document.documentElement.style.setProperty('--osaka-scroll', osakaScroll);
-                    }
                     ticking = false;
                 });
                 ticking = true;
             }
         });
 
-        // Mobile parallax on scroll
-        // Speeds: positive = scrolls down slower (recedes), negative = scrolls up (comes forward)
+        // ── Mobile parallax (direct transform) ────────────────────────────────
         const mobileParallaxLayers = [
             { selector: '.layer-slice1', speed: -0.08 },
             { selector: '.layer-lamps', speed: -0.12 },
@@ -919,17 +897,35 @@
             { selector: '.layer-title', speed: -0.18 },
         ];
 
-        function applyMobileParallax() {
-            const scrollY = window.scrollY;
-            mobileParallaxLayers.forEach(({ selector, speed }) => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    el.style.transform = `translateY(${scrollY * speed}px)`;
-                }
-            });
-        }
+        // Cache elements once
+        const mobileLayers = mobileParallaxLayers.map(({ selector, speed }) => ({
+            el: document.querySelector(selector),
+            speed,
+        }));
 
-        window.addEventListener('scroll', applyMobileParallax, { passive: true });
+        let mobileTicking = false;
+
+        scrollRoot.addEventListener('scroll', () => {
+            if (window.innerWidth > 768) return; // desktop handled separately
+
+            if (!mobileTicking) {
+                requestAnimationFrame(() => {
+                    const scrollTop = scrollRoot.scrollTop;
+
+                    // Offset to Kyoto section start so effect begins when section enters view
+                    const kyotoSection = document.querySelector('.kyoto-wrapper');
+                    const kyotoStart = kyotoSection ? kyotoSection.offsetTop : 0;
+                    const relativeScroll = Math.max(0, scrollTop - kyotoStart);
+
+                    mobileLayers.forEach(({ el, speed }) => {
+                        if (el) el.style.transform = `translateY(${relativeScroll * speed}px)`;
+                    });
+
+                    mobileTicking = false;
+                });
+                mobileTicking = true;
+            }
+        }, { passive: true });
     </script>
 
 </body>
