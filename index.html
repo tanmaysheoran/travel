@@ -436,25 +436,38 @@
             }
 
             .sapporo-sea {
-                width: 120%;
-                left: -10%;
-                bottom: -2%;
-                transform: none !important;
+                position: absolute;
+                width: 360% !important;
+                left: -45.5% !important;
+                bottom: -5% !important;
+                z-index: 1;
+                transform: translateY(calc(var(--sapporo-scroll) * 0.02px));
+                will-change: transform;
+                pointer-events: none;
             }
 
             .sapporo-buddha {
-                height: 85%;
-                width: auto;
+                position: absolute;
+                height: 175% !important;
+                width: 270% !important;
                 left: 50%;
-                bottom: -5%;
-                transform: translateX(-50%) !important;
+                bottom: -43% !important;
+                z-index: 2 !important;
+                transform: translateX(-50%) translateY(calc(var(--sapporo-scroll) * -0.06px));
+                will-change: transform;
+                pointer-events: none;
             }
 
             .sapporo-title {
-                width: 62%;
-                top: 8%;
-                left: 3%;
-                transform: none !important;
+                position: absolute;
+                width: 60% !important;
+                top: 23% !important;
+                left: -3% !important;
+                transform: translateY(-50%) translateX(calc(var(--sapporo-scroll) * 0.5px));
+                z-index: 1 !important;
+                filter: drop-shadow(0 4px 30px rgba(255, 255, 255, 0.8)) !important;
+                will-change: transform;
+                pointer-events: none;
             }
 
             /* --- Osaka --- */
@@ -954,6 +967,18 @@
             speed,
         }));
 
+        const mobileSapporoLayers = [
+            { selector: '.sapporo-sea', type: 'plain', speed: 0.02 }, // slow downward drift
+            { selector: '.sapporo-buddha', type: 'centerY', speed: -0.06 }, // preserves translateX(-50%)
+            { selector: '.sapporo-title', type: 'slideInFromLeft', speed: 0.5 }, // slides right on scroll
+        ];
+
+        const mobileSapporoEls = mobileSapporoLayers.map(({ selector, type, speed }) => ({
+            el: document.querySelector(selector),
+            type,
+            speed,
+        }));
+
         let mobileTicking = false;
 
         scrollRoot.addEventListener('scroll', () => {
@@ -999,6 +1024,24 @@
                             el.style.transform = `translateX(-50%) translateY(${-tokyoScroll * speed}px)`;
                         } else {
                             el.style.transform = `translateY(${tokyoScroll * speed}px)`;
+                        }
+                    });
+
+                    // Sapporo
+                    const sapporoSection = document.getElementById('sapporo-section');
+                    const sapporoStart = sapporoSection ? sapporoSection.offsetTop : 0;
+                    const sapporoScroll = Math.max(0, scrollTop - sapporoStart);
+
+                    mobileSapporoEls.forEach(({ el, type, speed }) => {
+                        if (!el) return;
+                        if (type === 'centerY') {
+                            // buddha: preserves translateX(-50%) alongside Y movement
+                            el.style.transform = `translateX(-50%) translateY(${sapporoScroll * speed}px)`;
+                        } else if (type === 'slideInFromLeft') {
+                            // title: preserves translateY(-50%) alongside X slide
+                            el.style.transform = `translateY(-50%) translateX(${sapporoScroll * speed}px)`;
+                        } else {
+                            el.style.transform = `translateY(${sapporoScroll * speed}px)`;
                         }
                     });
 
