@@ -13,7 +13,7 @@
             font-family: 'Apple SD Gothic Neo', -apple-system, sans-serif;
             background-color: #f8f8f8;
             /* Clean white background */
-            color: #111111;
+            color: #ffffff;
             overflow-x: hidden;
         }
 
@@ -115,14 +115,16 @@
             width: 150vw;
             height: 150vh;
             filter: blur(100px);
-            z-index: 1; /* Behind frosted overlay (z-index: 2) */
+            z-index: 1;
+            /* Behind frosted overlay (z-index: 2) */
             pointer-events: none;
             opacity: 0.5;
         }
 
         .char {
             position: relative;
-            z-index: 3; /* Above frosted overlay */
+            z-index: 3;
+            /* Above frosted overlay */
             display: inline-block;
             will-change: transform;
         }
@@ -162,7 +164,7 @@
 
                     const wordDiv = document.createElement('div');
                     wordDiv.className = 'word-container';
-                    
+
                     if (country.flag_colors && country.flag_colors.length > 0) {
                         const gradientDiv = document.createElement('div');
                         gradientDiv.className = 'flag-gradient';
