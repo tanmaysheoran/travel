@@ -1,0 +1,10 @@
+{
+    "countries": {
+        "japan": {
+            "name": "Japan"
+        },
+        "south_korea": {
+            "name": "South Korea"
+        }
+    }
+}
