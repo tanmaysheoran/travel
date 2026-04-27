@@ -122,13 +122,12 @@
         .flag-gradient {
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            left: 80%;
+            transform: translate(-80%, -17%);
             width: 150vw;
             height: 150vh;
             filter: blur(100px);
             z-index: 1;
-            /* Behind frosted overlay (z-index: 2) */
             pointer-events: none;
             opacity: 0.5;
         }
@@ -164,13 +163,20 @@
     <script>
         async function init() {
             try {
-                const response = await fetch('data.json');
-                const data = await response.json();
+                const manifestResponse = await fetch('countries/manifest.json');
+                const manifest = await manifestResponse.json();
+                const countries = await Promise.all(
+                    manifest.countries.map(async (id) => {
+                        const response = await fetch(`countries/${id}/data.json`);
+                        const country = await response.json();
+                        return [id, country];
+                    })
+                );
 
                 const container = document.getElementById('content');
                 const parallaxChars = [];
 
-                Object.entries(data.countries).forEach(([id, country]) => {
+                countries.forEach(([id, country]) => {
                     const countryGroup = document.createElement('div');
                     countryGroup.className = 'country-group';
 
