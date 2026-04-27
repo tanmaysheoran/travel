@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Parallax</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Apple SD Gothic Neo', -apple-system, sans-serif;
+            background-color: #f8f8f8;
+            /* Clean white background */
+            color: #111111;
+            overflow-x: hidden;
+        }
+
+        /* Subtle abstract background to give the frosted glass something to blur */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            background-color: #f8f8f8;
+            overflow: hidden;
+        }
+
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.4;
+        }
+
+        .glow-1 {
+            width: 50vw;
+            height: 50vw;
+            top: -20vw;
+            left: -10vw;
+            background-color: #e0e0ff;
+        }
+
+        .glow-2 {
+            width: 60vw;
+            height: 60vw;
+            bottom: -30vw;
+            right: -20vw;
+            background-color: #ffe0e0;
+        }
+
+        /* The full-background frosted glass effect */
+        .frosted-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            pointer-events: none;
+        }
+
+        /* Content container */
+        #content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 40vh 0;
+            /* scroll space */
+            gap: 70vh;
+            /* space between names */
+        }
+
+        .word-container {
+            display: flex;
+            font-size: 14vw;
+            font-weight: 700;
+            /* Increased font weight */
+            letter-spacing: 0.5vw;
+            text-transform: uppercase;
+        }
+
+        .char {
+            display: inline-block;
+            will-change: transform;
+        }
+
+        .char.space {
+            width: 3vw;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background with glows -->
+    <div class="bg-layer">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+    </div>
+
+    <!-- Full-screen frosted glass overlay -->
+    <div class="frosted-overlay"></div>
+
+    <!-- Scrollable content -->
+    <div id="content"></div>
+
+    <script>
+        async function init() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+
+                const container = document.getElementById('content');
+                const parallaxChars = [];
+
+                Object.values(data.countries).forEach(country => {
+                    const wordDiv = document.createElement('div');
+                    wordDiv.className = 'word-container';
+
+                    const name = country.name;
+
+                    for (let i = 0; i < name.length; i++) {
+                        const span = document.createElement('span');
+
+                        if (name[i] === ' ') {
+                            span.className = 'char space';
+                            span.innerHTML = '&nbsp;';
+                        } else {
+                            span.className = 'char';
+                            span.textContent = name[i];
+
+                            // "little" parallax - straight line on scroll
+                            // Sequential parallax, increasing speed from left to right
+                            const speedY = (i * 0.015) - 0.05;
+
+                            parallaxChars.push({
+                                element: span,
+                                parent: wordDiv,
+                                speedY: speedY
+                            });
+                        }
+
+                        wordDiv.appendChild(span);
+                    }
+
+                    container.appendChild(wordDiv);
+                });
+
+                // Scroll Parallax Logic
+                let isTicking = false;
+
+                function updateParallax() {
+                    const windowCenterY = window.innerHeight / 2;
+
+                    parallaxChars.forEach(charObj => {
+                        const rect = charObj.parent.getBoundingClientRect();
+                        // Distance from the vertical center of the screen
+                        const distanceFromCenter = (rect.top + rect.height / 2) - windowCenterY;
+
+                        // Apply straight vertical translation based on scroll distance
+                        const y = distanceFromCenter * charObj.speedY;
+
+                        charObj.element.style.transform = `translateY(${y}px)`;
+                    });
+
+                    isTicking = false;
+                }
+
+                window.addEventListener('scroll', () => {
+                    if (!isTicking) {
+                        window.requestAnimationFrame(updateParallax);
+                        isTicking = true;
+                    }
+                });
+
+                // Run an initial frame so it's correct on load
+                setTimeout(() => window.requestAnimationFrame(updateParallax), 50);
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
