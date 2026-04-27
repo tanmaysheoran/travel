@@ -7,7 +7,7 @@
                 "#e63946",
                 "#1a1a1a"
             ],
-            "name_in_language": "日本語"
+            "name_in_language": "日本"
         },
         "south_korea": {
             "name": "South Korea",
@@ -16,7 +16,7 @@
                 "#003478",
                 "#d62c1f"
             ],
-            "name_in_language": "한국어"
+            "name_in_language": "한국"
         }
     }
 }
