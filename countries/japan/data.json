@@ -1,5 +1,7 @@
 {
     "name": "Japan",
+    "iso_numeric": 392,
+    "coordinates": [139.6917, 35.6895],
     "flag_colors": [
         "#ffffff",
         "#e63946",
