@@ -1,0 +1,15 @@
+{
+    "name": "South Korea",
+    "iso_numeric": 410,
+    "coordinates": [
+        126.9780,
+        37.5665
+    ],
+    "flag_colors": [
+        "#ffffff",
+        "#cd2e3a",
+        "#003478",
+        "#000000"
+    ],
+    "name_in_language": "대한민국"
+}

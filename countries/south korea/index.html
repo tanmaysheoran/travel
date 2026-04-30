@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>South Korea</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --white: #ffffff;
+            --red: #cd2e3a;
+            --blue: #003478;
+            --black: #000000;
+            --bg: #f5f2ee;
+            --card-bg: #ffffff;
+            --text: #111111;
+            --muted: #888;
+        }
+
+        body {
+            font-family: 'DM Mono', monospace;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* subtle grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            background: var(--card-bg);
+            border: 1.5px solid #d9d4cd;
+            max-width: 480px;
+            width: 100%;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 6px 6px 0 #d9d4cd;
+            animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Flag-inspired top bar */
+        .flag-bar {
+            height: 6px;
+            display: flex;
+        }
+
+        .flag-bar span {
+            flex: 1;
+        }
+
+        .flag-bar span:nth-child(1) {
+            background: var(--red);
+        }
+
+        .flag-bar span:nth-child(2) {
+            background: var(--blue);
+        }
+
+        .flag-bar span:nth-child(3) {
+            background: var(--black);
+        }
+
+        .flag-bar span:nth-child(4) {
+            background: var(--red);
+        }
+
+        .flag-bar span:nth-child(5) {
+            background: var(--blue);
+        }
+
+        .card-inner {
+            padding: 2rem 2.2rem 2.2rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+
+        .name-block {}
+
+        .name-en {
+            font-family: 'DM Mono', monospace;
+            font-weight: 500;
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .name-kr {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .name-roman {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Taegeuk symbol */
+        .taegeuk {
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, var(--red), var(--blue));
+            margin-bottom: 1.6rem;
+            opacity: 0.4;
+        }
+
+        /* Data rows */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem 1.6rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .data-item {}
+
+        .data-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .data-value {
+            font-size: 0.82rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Color swatches */
+        .swatches {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.4rem;
+        }
+
+        .swatch {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .swatch-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+        }
+
+        .swatch-hex {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        /* Coordinates */
+        .coords {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .coord-pill {
+            background: #f0ece6;
+            border: 1px solid #ddd8d0;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.72rem;
+            color: var(--text);
+        }
+
+        /* ISO badge */
+        .iso-badge {
+            display: inline-block;
+            background: var(--blue);
+            color: #fff;
+            font-size: 0.72rem;
+            padding: 0.22rem 0.6rem;
+            letter-spacing: 0.08em;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid #e8e3dc;
+            padding-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #bbb;
+        }
+
+        .footer-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .footer-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .footer-dots span:nth-child(1) {
+            background: var(--red);
+        }
+
+        .footer-dots span:nth-child(2) {
+            background: var(--blue);
+        }
+
+        .footer-dots span:nth-child(3) {
+            background: var(--black);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="flag-bar">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="card-inner">
+            <div class="header">
+                <div class="name-block">
+                    <div class="name-en">Country</div>
+                    <div class="name-kr">대한민국</div>
+                    <div class="name-roman">Daehan Minguk</div>
+                </div>
+
+                <!-- Taegeuk SVG -->
+                <svg class="taegeuk" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="46" fill="white" stroke="#e0dbd4" stroke-width="1.5" />
+                    <!-- Blue half -->
+                    <path d="M50,14 A36,36 0 0,0 50,86 A18,18 0 0,0 50,50 A18,18 0 0,1 50,14 Z" fill="#003478" />
+                    <!-- Red half -->
+                    <path d="M50,14 A36,36 0 0,1 50,86 A18,18 0 0,1 50,50 A18,18 0 0,0 50,14 Z" fill="#cd2e3a" />
+                    <!-- Trigrams (simplified) -->
+                    <g stroke="#000" stroke-width="2.8" stroke-linecap="round" opacity="0.85">
+                        <!-- top-left -->
+                        <line x1="14" y1="21" x2="26" y2="21" />
+                        <line x1="14" y1="25" x2="26" y2="25" />
+                        <line x1="14" y1="29" x2="26" y2="29" />
+                        <!-- top-right -->
+                        <line x1="74" y1="21" x2="86" y2="21" />
+                        <line x1="74" y1="25" x2="79" y2="25" />
+                        <line x1="81" y1="25" x2="86" y2="25" />
+                        <line x1="74" y1="29" x2="86" y2="29" />
+                        <!-- bottom-left -->
+                        <line x1="14" y1="71" x2="26" y2="71" />
+                        <line x1="14" y1="75" x2="19" y2="75" />
+                        <line x1="21" y1="75" x2="26" y2="75" />
+                        <line x1="14" y1="79" x2="19" y2="79" />
+                        <line x1="21" y1="79" x2="26" y2="79" />
+                        <!-- bottom-right -->
+                        <line x1="74" y1="71" x2="86" y2="71" />
+                        <line x1="74" y1="75" x2="79" y2="75" />
+                        <line x1="81" y1="75" x2="86" y2="75" />
+                        <line x1="74" y1="79" x2="86" y2="79" />
+                    </g>
+                </svg>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="data-grid">
+                <div class="data-item">
+                    <div class="data-label">ISO Numeric</div>
+                    <div class="data-value">
+                        <span class="iso-badge">410</span>
+                    </div>
+                </div>
+
+                <div class="data-item">
+                    <div class="data-label">Name</div>
+                    <div class="data-value">South Korea</div>
+                </div>
+
+                <div class="data-item" style="grid-column: 1 / -1;">
+                    <div class="data-label">Coordinates (lng, lat)</div>
+                    <div class="data-value">
+                        <div class="coords">
+                            <span class="coord-pill">126.9780° E</span>
+                            <span class="coord-pill">37.5665° N</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-item" style="grid-column: 1 / -1;">
+                    <div class="data-label">Flag Colors</div>
+                    <div class="swatches">
+                        <div class="swatch">
+                            <div class="swatch-dot" style="background:#ffffff;"></div>
+                            <span class="swatch-hex">#ffffff</span>
+                        </div>
+                        <div class="swatch">
+                            <div class="swatch-dot" style="background:#cd2e3a;"></div>
+                            <span class="swatch-hex">#cd2e3a</span>
+                        </div>
+                        <div class="swatch">
+                            <div class="swatch-dot" style="background:#003478;"></div>
+                            <span class="swatch-hex">#003478</span>
+                        </div>
+                        <div class="swatch">
+                            <div class="swatch-dot" style="background:#000000;"></div>
+                            <span class="swatch-hex">#000000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span class="footer-label">Republic of Korea · KOR</span>
+                <div class="footer-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
