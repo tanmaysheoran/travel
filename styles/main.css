@@ -1,0 +1,124 @@
+/* ── Themes ───────────────────────────────────────────────────────────────── */
+:root {
+    --bg:         #07070f;
+    --text-hi:    rgba(255,255,255,0.88);
+    --text-mid:   rgba(255,255,255,0.35);
+    --text-lo:    rgba(255,255,255,0.15);
+    --arc-stroke: rgba(255,255,255,0.5);
+    --toggle-bg:  rgba(255,255,255,0.07);
+    --toggle-fg:  rgba(255,255,255,0.4);
+}
+
+body.light {
+    --bg:         #f0f0f8;
+    --text-hi:    rgba(0,0,0,0.82);
+    --text-mid:   rgba(0,0,0,0.38);
+    --text-lo:    rgba(0,0,0,0.2);
+    --arc-stroke: rgba(0,0,0,0.38);
+    --toggle-bg:  rgba(0,0,0,0.06);
+    --toggle-fg:  rgba(0,0,0,0.38);
+}
+
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    font-family: 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    transition: background 0.5s ease;
+}
+
+/* ── Map SVG ──────────────────────────────────────────────────────────────── */
+#map-svg {
+    position: fixed;
+    inset: 0;
+    width: 100vw; height: 100vh;
+}
+
+/* ── Country paths ────────────────────────────────────────────────────────── */
+.country { cursor: default; }
+.country.visited { cursor: pointer; }
+
+/* ── Flight arc ───────────────────────────────────────────────────────────── */
+.flight-arc {
+    fill: none;
+    stroke: var(--arc-stroke);
+    stroke-width: 1;
+    stroke-linecap: round;
+    transition: stroke 0.5s ease;
+}
+
+/* ── UI chrome ────────────────────────────────────────────────────────────── */
+#site-title {
+    position: fixed;
+    top: 36px; left: 44px;
+    font-size: 10px; font-weight: 400;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--text-lo);
+    z-index: 10;
+    transition: color 0.5s ease;
+}
+
+#top-right {
+    position: fixed;
+    top: 30px; right: 44px;
+    display: flex; align-items: center; gap: 18px;
+    z-index: 10;
+}
+
+#counter {
+    font-size: 10px; font-weight: 300;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--text-lo);
+    transition: color 0.5s ease;
+}
+
+#theme-toggle {
+    background: var(--toggle-bg);
+    border: 1px solid var(--toggle-bg);
+    color: var(--toggle-fg);
+    font-family: inherit;
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+#theme-toggle:hover { filter: brightness(1.25); }
+
+/* ── Hover info panel ─────────────────────────────────────────────────────── */
+#hover-info {
+    position: fixed;
+    bottom: 40px; left: 44px;
+    z-index: 10; pointer-events: none;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#hover-info.visible {
+    opacity: 1; transform: translateY(0);
+}
+
+#info-native {
+    font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+    transition: color 0.5s ease;
+}
+
+#info-name {
+    font-size: 36px; font-weight: 200;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-hi); line-height: 1;
+    transition: color 0.5s ease;
+}
+
+#info-hint {
+    margin-top: 10px;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--text-lo);
+    transition: color 0.5s ease;
+}

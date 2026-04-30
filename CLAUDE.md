@@ -4,12 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Running locally
 
-This is a pure static site. Because `index.html` uses `fetch()` to load country data, it must be served over HTTP — opening the file directly will fail with CORS errors.
+The landing page uses ES modules and `fetch()` — must be served over HTTP, not opened as a file.
 
 ```bash
-# Any of these work:
 python3 -m http.server 8080
-npx serve .
+# or: npx serve .
 ```
 
 Then open `http://localhost:8080`.
@@ -17,49 +16,81 @@ Then open `http://localhost:8080`.
 ## Architecture
 
 ```
-index.html                          # Landing page — country list with parallax
+index.html                          # Lean HTML shell (no inline CSS/JS)
+styles/
+  main.css                          # All landing-page CSS + theme variables
+js/
+  config.js                         # HOME coordinates, THEME color constants
+  map.js                            # D3/TopoJSON re-exports, SVG canvas, projection, layer groups
+  theme.js                          # Dark/light toggle logic, applySVGTheme()
+  gradient.js                       # Per-country hover gradient defs + sweep animation
+  arc.js                            # Flight arc draw/clear
+  markers.js                        # Home marker + visited country dots
+  countries.js                      # Load + render countries, event handlers, idle pulse
+  main.js                           # Entry point — wires everything, fetches world data
 countries/
-  manifest.json                     # Ordered list of country IDs to render
+  manifest.json                     # Ordered list of country IDs to show on map
   {country-id}/
-    data.json                       # { name, flag_colors, name_in_language }
-    index.html                      # Full country detail page
+    data.json                       # Country metadata (see schema below)
+    index.html                      # Country detail page (sticky parallax)
     content/
-      hero.jpg                      # Hero image
+      hero.jpg
       {city}/                       # Per-city SVG layer assets
-        title.svg
-        *.svg / *.jpg.svg
 ```
 
-### Landing page (`index.html`)
+### JS module dependency graph (no cycles)
 
-Reads `manifest.json`, fetches each country's `data.json`, then dynamically builds the DOM. Each country name is split into individual `<span class="char">` elements with a sequential `speedY` value that drives per-character parallax on scroll. Flag colors from `data.json` are rendered as a blurred gradient behind the country name.
+```
+config.js          ← (no imports)
+map.js             ← d3, topojson [CDN ESM — URL lives here only]
+theme.js           ← config.js, map.js
+gradient.js        ← map.js
+arc.js             ← config.js, map.js
+markers.js         ← config.js, map.js
+countries.js       ← map.js, gradient.js, arc.js
+main.js            ← map.js, theme.js, countries.js, markers.js
+```
 
-Clicking a country navigates to `countries/{id}/index.html`.
+D3 and topojson are imported as ESM from jsDelivr inside `map.js` and re-exported — the CDN URL is in one place only.
+
+### Landing page flow
+
+`main.js` boots: draws sphere/graticule, fetches world topology + manifest, delegates to `drawMap()`, `drawHomeMarker()`, `drawCountryDots()`.
+
+`countries.js` handles country paths: visited countries glow (flag color), pulse idle, and on hover the gradient sweeps + a flight arc draws from home.
+
+`gradient.js` uses `gradientUnits="objectBoundingBox"` — gradient auto-scales to each country's bounding box, no screen-coordinate math needed.
 
 ### Country detail page (`countries/{id}/index.html`)
 
-Each city is a full-screen sticky parallax section. The pattern is consistent across cities:
+Each city is a full-screen sticky parallax section:
+- `{city}-wrapper` with `height: N*100vh` creates scroll distance
+- `.sticky-container` pins the scene to viewport
+- Image layers use `will-change: transform`
 
-- A `{city}-wrapper` div with `height: N*100vh` creates the scroll distance
-- A `.sticky-container` inside pins the scene to the viewport while scrolling through the wrapper
-- Individual image layers are absolutely positioned with `will-change: transform`
-
-**Desktop parallax** — driven by CSS custom properties (`--kyoto-scroll`, `--fuji-scroll`, etc.) set from the `#scroll-root` scroll event. Each layer's CSS references these variables directly (e.g. `transform: translateY(calc(var(--kyoto-scroll) * -0.08px))`).
-
-**Mobile parallax** — skips CSS variables; directly sets `el.style.transform` in the scroll handler for each layer, preserving any existing translate components (e.g. `translateX(-50%)`) that are part of the mobile layout.
+**Desktop** — CSS custom properties (`--kyoto-scroll` etc.) updated by scroll handler.
+**Mobile** — direct `el.style.transform`, preserving any base `translateX(-50%)` etc.
 
 ### Adding a new country
 
 1. Add the country ID to `countries/manifest.json`
-2. Create `countries/{id}/data.json` with these fields:
-   - `name` — English name
-   - `iso_numeric` — ISO 3166-1 numeric code (used by D3/TopoJSON to locate the country on the map)
-   - `coordinates` — `[longitude, latitude]` of the capital/main city (arc endpoint + dot position)
-   - `flag_colors` — array of hex strings; index `[1]` is used as the country fill/glow color
-   - `name_in_language` — native name shown in the hover panel
-3. Create `countries/{id}/index.html` following the sticky-parallax pattern from the Japan page
-4. Add city SVG assets under `countries/{id}/content/{city}/`
+2. Create `countries/{id}/data.json`:
+   ```json
+   {
+     "name": "...",
+     "iso_numeric": 392,
+     "coordinates": [lng, lat],
+     "flag_colors": ["#hex", "#hex"],
+     "name_in_language": "..."
+   }
+   ```
+   - `iso_numeric` — ISO 3166-1 numeric code (D3/TopoJSON uses this to find the country)
+   - `coordinates` — capital city `[lng, lat]`, used as arc endpoint and dot position
+   - `flag_colors[1]` — primary fill/glow/gradient color on the map
+3. Create `countries/{id}/index.html` following the sticky-parallax pattern
+4. Add assets to `countries/{id}/content/`
 
-### Map config (index.html)
+### Config
 
-The `HOME` constant near the top of `index.html`'s `<script>` sets the origin point for all flight-path arcs — change `coordinates` to `[lng, lat]` of your home city.
+**Home city** (arc origin): `HOME` in `js/config.js`.
+**Theme colors**: `THEME.dark` / `THEME.light` in `js/config.js` — SVG-attribute colors only; HTML element colors use CSS vars in `styles/main.css`.
