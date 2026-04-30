@@ -35,7 +35,7 @@ function qDelta(v0, v1) {
     const l = Math.hypot(...w);
     if (!l) return [1, 0, 0, 0];
     const t = Math.atan2(l, dot) / 2, s = Math.sin(t) / l;
-    return [Math.cos(t), w[0]*s, w[1]*s, w[2]*s];
+    return [Math.cos(t), w[2]*s, -w[1]*s, w[0]*s];
 }
 
 // ── Module state ───────────────────────────────────────────────────────────────
