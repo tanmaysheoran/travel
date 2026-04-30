@@ -1,7 +1,6 @@
 import * as d3lib   from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 import * as topolib from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
 
-// Re-export so every other module imports from here — CDN URL stays in one place
 export const d3       = d3lib;
 export const topojson = topolib;
 
@@ -10,9 +9,15 @@ export const H = window.innerHeight;
 
 export const svg = d3.select('#map-svg').attr('width', W).attr('height', H);
 
-export const projection = d3.geoNaturalEarth1()
-    .scale(W / 6.0)
-    .translate([W / 2, H / 2]);
+// ── Orthographic globe ────────────────────────────────────────────────────────
+// Initial rotation centers on New Delhi. Negative of [lng, lat].
+export const BASE_SCALE = Math.min(W, H) * 0.42;
+
+export const projection = d3.geoOrthographic()
+    .scale(BASE_SCALE)
+    .translate([W / 2, H / 2])
+    .clipAngle(90)
+    .rotate([-77.2, -28.6, 0]);
 
 export const geoPath = d3.geoPath().projection(projection);
 
@@ -33,10 +38,15 @@ makeGlow('glow-soft',   5);
 makeGlow('glow-strong', 14);
 makeGlow('glow-arc',    3);
 
-// ── Layer groups (z-order: bottom → top) ──────────────────────────────────────
-export const gSphere    = svg.append('g');
-export const gGraticule = svg.append('g');
-export const gCountries = svg.append('g');
-export const gBorders   = svg.append('g');
-export const gArcs      = svg.append('g');
-export const gMarkers   = svg.append('g');
+// ── Layer groups ──────────────────────────────────────────────────────────────
+export const gMap       = svg.append('g').attr('id', 'g-map');
+export const gSphere    = gMap.append('g');
+export const gGraticule = gMap.append('g');
+export const gCountries = gMap.append('g');
+export const gBorders   = gMap.append('g');
+export const gLabels    = gMap.append('g');
+export const gArcs      = gMap.append('g');
+
+// Markers live outside gMap — repositioned explicitly, not affected by transforms
+export const gOverlay = svg.append('g').attr('id', 'g-overlay');
+export const gMarkers = gOverlay.append('g');

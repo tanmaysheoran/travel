@@ -14,6 +14,7 @@ export async function loadVisitedCountries(manifest) {
     );
 }
 
+// Returns { features, visitedByIso } so main.js can pass them to createLabels.
 export function drawMap(world, topojson, visitedList) {
     const visitedByIso = new Map(visitedList.map(c => [String(c.iso_numeric), c]));
 
@@ -87,7 +88,10 @@ export function drawMap(world, topojson, visitedList) {
         .attr('d', geoPath)
         .attr('fill', 'none')
         .attr('stroke', '#181830')
-        .attr('stroke-width', 0.35);
+        .attr('stroke-width', 0.35)
+        .style('vector-effect', 'non-scaling-stroke');
+
+    return { features, visitedByIso };
 }
 
 // Recursive idle pulse — interrupted on hover, restarted on mouse-leave

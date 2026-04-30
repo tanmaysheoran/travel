@@ -122,3 +122,24 @@ html, body {
     color: var(--text-lo);
     transition: color 0.5s ease;
 }
+
+/* ── Country name labels ──────────────────────────────────────────────────── */
+.map-label {
+    font-family: 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.map-label.visited {
+    font-weight: 500;
+}
+
+/* ── Non-scaling strokes ──────────────────────────────────────────────────── */
+/* Borders and graticule stay visually thin regardless of zoom level.
+   The arc stroke is also in this group since it's set via CSS. */
+.flight-arc,
+.graticule path {
+    vector-effect: non-scaling-stroke;
+}

@@ -54,3 +54,8 @@ export function drawArc(country) {
 export function clearArcs() {
     gArcs.selectAll('*').interrupt().remove();
 }
+
+// Called on projection change to keep any live arc in sync with the globe.
+export function redrawArcs() {
+    gArcs.selectAll('path').attr('d', geoPath);
+}

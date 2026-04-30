@@ -1,5 +1,6 @@
 import { THEME } from './config.js';
 import { d3, gSphere, gGraticule, gCountries, gBorders, gMarkers } from './map.js';
+import { updateLabelTheme } from './labels.js';
 
 export let isDark = true;
 
@@ -11,12 +12,12 @@ export function initTheme() {
         document.body.classList.toggle('light', !isDark);
         toggleBtn.textContent = isDark ? '☀ light' : '● dark';
         applySVGTheme();
+        updateLabelTheme(isDark);
     });
 }
 
-// Updates SVG-attribute-driven colors (CSS vars cover the HTML elements)
 export function applySVGTheme() {
-    const t = isDark ? THEME.dark : THEME.light;
+    const t   = isDark ? THEME.dark : THEME.light;
     const dur = 500;
 
     gSphere.select('path').transition().duration(dur).attr('fill', t.sphere);
