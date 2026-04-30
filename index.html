@@ -5,141 +5,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Travel — lackofabetter.work</title>
     <style>
+        /* ── Themes ── */
+        :root {
+            --bg:         #07070f;
+            --sphere:     #060610;
+            --land:       #0f0f1c;
+            --border:     #181830;
+            --graticule:  rgba(255,255,255,0.025);
+            --text-hi:    rgba(255,255,255,0.88);
+            --text-mid:   rgba(255,255,255,0.35);
+            --text-lo:    rgba(255,255,255,0.15);
+            --arc-stroke: rgba(255,255,255,0.5);
+            --toggle-bg:  rgba(255,255,255,0.07);
+            --toggle-fg:  rgba(255,255,255,0.4);
+        }
+
+        body.light {
+            --bg:         #f0f0f8;
+            --sphere:     #ccd8ed;
+            --land:       #dcdce8;
+            --border:     #b8b8cc;
+            --graticule:  rgba(0,0,0,0.06);
+            --text-hi:    rgba(0,0,0,0.82);
+            --text-mid:   rgba(0,0,0,0.38);
+            --text-lo:    rgba(0,0,0,0.2);
+            --arc-stroke: rgba(0,0,0,0.38);
+            --toggle-bg:  rgba(0,0,0,0.06);
+            --toggle-fg:  rgba(0,0,0,0.38);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             width: 100%; height: 100%;
-            background: #07070f;
+            background: var(--bg);
             font-family: 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
-            color: white;
+            transition: background 0.5s ease;
         }
 
         #map-svg {
             position: fixed;
-            top: 0; left: 0;
+            inset: 0;
             width: 100vw; height: 100vh;
-            display: block;
         }
 
         /* ── Country paths ── */
-        .country {
-            fill: #0f0f1c;
-            stroke: #181830;
-            stroke-width: 0.4;
-        }
-
-        .country.visited {
-            cursor: pointer;
-            transition: fill-opacity 0.4s ease;
-        }
+        .country { cursor: default; }
+        .country.visited { cursor: pointer; }
 
         /* ── Arc ── */
         .flight-arc {
             fill: none;
-            stroke: rgba(255, 255, 255, 0.45);
+            stroke: var(--arc-stroke);
             stroke-width: 1;
             stroke-linecap: round;
+            transition: stroke 0.5s ease;
         }
 
-        /* ── UI Chrome ── */
+        /* ── UI chrome ── */
         #site-title {
             position: fixed;
-            top: 36px;
-            left: 44px;
-            font-size: 10px;
-            font-weight: 400;
-            letter-spacing: 0.35em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.2);
+            top: 36px; left: 44px;
+            font-size: 10px; font-weight: 400;
+            letter-spacing: 0.35em; text-transform: uppercase;
+            color: var(--text-lo);
+            z-index: 10;
+            transition: color 0.5s ease;
+        }
+
+        #top-right {
+            position: fixed;
+            top: 30px; right: 44px;
+            display: flex; align-items: center; gap: 18px;
             z-index: 10;
         }
 
         #counter {
-            position: fixed;
-            top: 36px;
-            right: 44px;
-            font-size: 10px;
-            font-weight: 300;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.15);
-            z-index: 10;
+            font-size: 10px; font-weight: 300;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--text-lo);
+            transition: color 0.5s ease;
         }
+
+        #theme-toggle {
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-bg);
+            color: var(--toggle-fg);
+            font-family: inherit;
+            font-size: 10px; letter-spacing: 0.25em;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+        }
+
+        #theme-toggle:hover { filter: brightness(1.25); }
 
         /* ── Hover info ── */
         #hover-info {
             position: fixed;
-            bottom: 40px;
-            left: 44px;
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(6px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            bottom: 40px; left: 44px;
+            z-index: 10; pointer-events: none;
+            opacity: 0; transform: translateY(8px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         #hover-info.visible {
-            opacity: 1;
-            transform: translateY(0);
+            opacity: 1; transform: translateY(0);
         }
 
         #info-native {
-            font-size: 10px;
-            letter-spacing: 0.35em;
+            font-size: 10px; letter-spacing: 0.35em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.35);
+            color: var(--text-mid);
             margin-bottom: 6px;
+            transition: color 0.5s ease;
         }
 
         #info-name {
-            font-size: 36px;
-            font-weight: 200;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1;
+            font-size: 36px; font-weight: 200;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--text-hi); line-height: 1;
+            transition: color 0.5s ease;
         }
 
         #info-hint {
             margin-top: 10px;
-            font-size: 10px;
-            letter-spacing: 0.3em;
+            font-size: 10px; letter-spacing: 0.3em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* ── Home label ── */
-        .home-label {
-            font-size: 9px;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            fill: rgba(255, 255, 255, 0.25);
-        }
-
-        /* ── Ripple animation ── */
-        @keyframes ripple {
-            0%   { r: 4px;  opacity: 0.7; }
-            100% { r: 22px; opacity: 0;   }
-        }
-
-        /* ── Graticule lines ── */
-        .graticule {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.025);
-            stroke-width: 0.4;
-        }
-
-        /* ── Sphere (ocean) ── */
-        .sphere {
-            fill: #060610;
+            color: var(--text-lo);
+            transition: color 0.5s ease;
         }
     </style>
 </head>
 <body>
 
 <div id="site-title">lackofabetter.work</div>
-<div id="counter"></div>
+
+<div id="top-right">
+    <div id="counter"></div>
+    <button id="theme-toggle">☀ light</button>
+</div>
 
 <div id="hover-info">
     <div id="info-native"></div>
@@ -153,20 +161,43 @@
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-// Change to your home city [longitude, latitude]
 const HOME = {
-    coordinates: [-0.1276, 51.5074],
+    coordinates: [77.2090, 28.6139], // New Delhi [lng, lat]
     label: 'Home'
 };
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+let isDark = true;
+
+const THEME = {
+    dark:  { sphere: '#060610', land: '#0f0f1c', border: '#181830', grat: 'rgba(255,255,255,0.025)', homeRing: 'rgba(255,255,255,0.08)', homeDot: 'rgba(255,255,255,0.45)', homeLabel: 'rgba(255,255,255,0.22)' },
+    light: { sphere: '#ccd8ed', land: '#dcdce8', border: '#b8b8cc', grat: 'rgba(0,0,0,0.06)',        homeRing: 'rgba(0,0,0,0.12)',        homeDot: 'rgba(0,0,0,0.38)',        homeLabel: 'rgba(0,0,0,0.28)'        },
+};
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    isDark = !isDark;
+    document.body.classList.toggle('light', !isDark);
+    document.getElementById('theme-toggle').textContent = isDark ? '☀ light' : '● dark';
+    applySVGTheme();
+});
+
+function applySVGTheme() {
+    const t = isDark ? THEME.dark : THEME.light;
+    gSphere.select('path').transition().duration(500).attr('fill', t.sphere);
+    gGraticule.select('path').transition().duration(500).attr('stroke', t.grat);
+    gCountries.selectAll('.country:not(.visited)').transition().duration(500).attr('fill', t.land);
+    gBorders.select('path').transition().duration(500).attr('stroke', t.border);
+    gMarkers.select('.home-ring').transition().duration(500).attr('stroke', t.homeRing);
+    gMarkers.select('.home-dot').transition().duration(500).attr('fill', t.homeDot);
+    gMarkers.select('.home-label').transition().duration(500).attr('fill', t.homeLabel);
+}
 
 // ── DIMENSIONS ────────────────────────────────────────────────────────────────
 const W = window.innerWidth;
 const H = window.innerHeight;
 
-// ── SVG SETUP ─────────────────────────────────────────────────────────────────
-const svg = d3.select('#map-svg')
-    .attr('width', W)
-    .attr('height', H);
+// ── SVG & PROJECTION ─────────────────────────────────────────────────────────
+const svg = d3.select('#map-svg').attr('width', W).attr('height', H);
 
 const projection = d3.geoNaturalEarth1()
     .scale(W / 6.0)
@@ -174,47 +205,44 @@ const projection = d3.geoNaturalEarth1()
 
 const geoPath = d3.geoPath().projection(projection);
 
-// ── DEFS (filters) ────────────────────────────────────────────────────────────
+// ── FILTERS ───────────────────────────────────────────────────────────────────
 const defs = svg.append('defs');
 
-function makeGlowFilter(id, stdDeviation) {
-    const filter = defs.append('filter')
-        .attr('id', id)
-        .attr('x', '-80%').attr('y', '-80%')
-        .attr('width', '260%').attr('height', '260%');
-    filter.append('feGaussianBlur')
-        .attr('in', 'SourceGraphic')
-        .attr('stdDeviation', stdDeviation)
-        .attr('result', 'blur');
-    const merge = filter.append('feMerge');
-    merge.append('feMergeNode').attr('in', 'blur');
-    merge.append('feMergeNode').attr('in', 'SourceGraphic');
+function makeGlow(id, std) {
+    const f = defs.append('filter').attr('id', id)
+        .attr('x', '-80%').attr('y', '-80%').attr('width', '260%').attr('height', '260%');
+    f.append('feGaussianBlur').attr('in', 'SourceGraphic').attr('stdDeviation', std).attr('result', 'blur');
+    const m = f.append('feMerge');
+    m.append('feMergeNode').attr('in', 'blur');
+    m.append('feMergeNode').attr('in', 'SourceGraphic');
 }
 
-makeGlowFilter('glow-soft', 5);
-makeGlowFilter('glow-strong', 10);
-makeGlowFilter('glow-arc', 3);
+makeGlow('glow-soft',   5);
+makeGlow('glow-strong', 14);
+makeGlow('glow-arc',    3);
 
-// ── LAYER GROUPS ─────────────────────────────────────────────────────────────
-const gSphere     = svg.append('g');
-const gGraticule  = svg.append('g');
-const gCountries  = svg.append('g');
-const gBorders    = svg.append('g');
-const gArcs       = svg.append('g');
-const gMarkers    = svg.append('g');
+// ── GROUPS (z-order) ─────────────────────────────────────────────────────────
+const gSphere    = svg.append('g');
+const gGraticule = svg.append('g');
+const gCountries = svg.append('g');
+const gBorders   = svg.append('g');
+const gArcs      = svg.append('g');
+const gMarkers   = svg.append('g');
 
 // ── SPHERE & GRATICULE ────────────────────────────────────────────────────────
 gSphere.append('path')
     .datum({ type: 'Sphere' })
-    .attr('class', 'sphere')
+    .attr('fill', THEME.dark.sphere)
     .attr('d', geoPath);
 
 gGraticule.append('path')
     .datum(d3.geoGraticule()())
-    .attr('class', 'graticule')
+    .attr('fill', 'none')
+    .attr('stroke', THEME.dark.grat)
+    .attr('stroke-width', 0.4)
     .attr('d', geoPath);
 
-// ── MAIN INIT ─────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
     const [world, manifest] = await Promise.all([
         d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'),
@@ -223,7 +251,7 @@ async function init() {
 
     const visitedList = await Promise.all(
         manifest.countries.map(id =>
-            d3.json(`countries/${id}/data.json`).then(data => ({ id, ...data }))
+            d3.json(`countries/${id}/data.json`).then(d => ({ id, ...d }))
         )
     );
 
@@ -232,27 +260,45 @@ async function init() {
     document.getElementById('counter').textContent =
         `${visitedList.length} ${visitedList.length === 1 ? 'country' : 'countries'} explored`;
 
+    // ── Per-country hover gradient (objectBoundingBox so it scales to each shape) ──
+    visitedList.forEach(country => {
+        const c1 = country.flag_colors?.[1] ?? '#ffffff'; // accent (bright center)
+        const c2 = country.flag_colors?.[0] ?? c1;        // secondary (dim edges)
+
+        const grad = defs.append('linearGradient')
+            .attr('id', `grad-${country.id}`)
+            .attr('gradientUnits', 'objectBoundingBox')
+            .attr('x1', 0).attr('y1', 0)
+            .attr('x2', 1).attr('y2', 0)
+            .attr('gradientTransform', 'rotate(-35, 0.5, 0.5)');
+
+        grad.append('stop').attr('offset',  '0%').attr('stop-color', c2).attr('stop-opacity', 0.1);
+        grad.append('stop').attr('offset', '30%').attr('stop-color', c1).attr('stop-opacity', 0.75);
+        grad.append('stop').attr('offset', '50%').attr('stop-color', c1).attr('stop-opacity', 1.0);
+        grad.append('stop').attr('offset', '70%').attr('stop-color', c1).attr('stop-opacity', 0.75);
+        grad.append('stop').attr('offset','100%').attr('stop-color', c2).attr('stop-opacity', 0.1);
+    });
+
+    // ── Country paths ─────────────────────────────────────────────────────────
     const features = topojson.feature(world, world.objects.countries).features;
     const borders  = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
 
-    // ── Draw countries ────────────────────────────────────────────────────────
     gCountries.selectAll('path')
         .data(features)
         .join('path')
         .attr('d', geoPath)
         .attr('class', d => visitedByIso.has(String(d.id)) ? 'country visited' : 'country')
+        .attr('fill', d => {
+            const c = visitedByIso.get(String(d.id));
+            return c ? (c.flag_colors?.[1] ?? '#fff') : THEME.dark.land;
+        })
+        .attr('fill-opacity', d => visitedByIso.has(String(d.id)) ? 0.45 : 1)
+        .attr('stroke', 'none')
         .each(function(d) {
-            const country = visitedByIso.get(String(d.id));
-            if (!country) return;
-
-            const color = country.flag_colors?.[1] ?? '#ffffff';
-            d3.select(this)
-                .attr('fill', color)
-                .attr('fill-opacity', 0.45)
-                .attr('filter', 'url(#glow-soft)');
-
-            // Idle pulse via D3 transitions
-            pulsePath(d3.select(this), 0.45, 0.7, 2800 + Math.random() * 800);
+            const c = visitedByIso.get(String(d.id));
+            if (!c) return;
+            d3.select(this).attr('filter', 'url(#glow-soft)');
+            pulsePath(d3.select(this), 0.4, 0.65, 2600 + Math.random() * 700);
         })
         .on('mouseenter', function(event, d) {
             const country = visitedByIso.get(String(d.id));
@@ -260,26 +306,31 @@ async function init() {
 
             d3.select(this)
                 .interrupt()
-                .attr('fill-opacity', 0.85)
+                .attr('fill', `url(#grad-${country.id})`)
+                .attr('fill-opacity', 1)
                 .attr('filter', 'url(#glow-strong)');
+
+            sweepGradient(country.id);
 
             document.getElementById('info-native').textContent = country.name_in_language ?? '';
             document.getElementById('info-name').textContent   = country.name;
             document.getElementById('hover-info').classList.add('visible');
-
             drawArc(country);
         })
         .on('mouseleave', function(event, d) {
             const country = visitedByIso.get(String(d.id));
             if (!country) return;
 
-            const color = country.flag_colors?.[1] ?? '#ffffff';
+            const baseColor = country.flag_colors?.[1] ?? '#fff';
             d3.select(this)
                 .interrupt()
-                .attr('fill', color)
-                .attr('filter', 'url(#glow-soft)');
-
-            pulsePath(d3.select(this), 0.45, 0.7, 2800 + Math.random() * 800);
+                .attr('filter', 'url(#glow-soft)')
+                .transition().duration(450).ease(d3.easeQuadIn)
+                .attr('fill', baseColor)
+                .attr('fill-opacity', 0.45)
+                .on('end', function() {
+                    pulsePath(d3.select(this), 0.4, 0.65, 2600 + Math.random() * 700);
+                });
 
             document.getElementById('hover-info').classList.remove('visible');
             clearArcs();
@@ -294,7 +345,7 @@ async function init() {
         .datum(borders)
         .attr('d', geoPath)
         .attr('fill', 'none')
-        .attr('stroke', '#1a1a2e')
+        .attr('stroke', THEME.dark.border)
         .attr('stroke-width', 0.35);
 
     // ── Home marker ───────────────────────────────────────────────────────────
@@ -302,18 +353,20 @@ async function init() {
     if (homeXY) {
         const g = gMarkers.append('g').attr('transform', `translate(${homeXY})`);
 
-        g.append('circle').attr('r', 12)
-            .attr('fill', 'none')
-            .attr('stroke', 'rgba(255,255,255,0.08)')
-            .attr('stroke-width', 1);
+        g.append('circle').attr('class', 'home-ring')
+            .attr('r', 14).attr('fill', 'none')
+            .attr('stroke', THEME.dark.homeRing).attr('stroke-width', 1);
 
-        g.append('circle').attr('r', 3)
-            .attr('fill', 'rgba(255,255,255,0.4)')
+        g.append('circle').attr('class', 'home-dot')
+            .attr('r', 2.8)
+            .attr('fill', THEME.dark.homeDot)
             .attr('filter', 'url(#glow-soft)');
 
-        g.append('text')
-            .attr('class', 'home-label')
-            .attr('x', 8).attr('y', -8)
+        g.append('text').attr('class', 'home-label')
+            .attr('x', 10).attr('y', -10)
+            .attr('fill', THEME.dark.homeLabel)
+            .attr('font-size', '9px')
+            .attr('letter-spacing', '0.25em')
             .text(HOME.label);
     }
 
@@ -326,25 +379,28 @@ async function init() {
         const color = country.flag_colors?.[1] ?? '#ffffff';
         const g = gMarkers.append('g').attr('transform', `translate(${xy})`);
 
-        // Ripple ring — re-triggered on animationiteration
         const ring = g.append('circle')
-            .attr('r', 4)
-            .attr('fill', 'none')
-            .attr('stroke', color)
-            .attr('stroke-width', 1.2)
-            .attr('opacity', 0.7);
+            .attr('r', 4).attr('fill', 'none')
+            .attr('stroke', color).attr('stroke-width', 1.2).attr('opacity', 0.8);
 
         animateRipple(ring);
 
-        // Center dot
         g.append('circle')
-            .attr('r', 2.5)
-            .attr('fill', color)
+            .attr('r', 2.8).attr('fill', color)
             .attr('filter', 'url(#glow-soft)');
     });
 }
 
-// ── IDLE PULSE (D3 recursive transition) ──────────────────────────────────────
+// ── GRADIENT SWEEP ────────────────────────────────────────────────────────────
+// Rotates the gradient from -35° to +55° (a 90° sweep across the country shape)
+function sweepGradient(id) {
+    const grad = d3.select(`#grad-${id}`);
+    grad.attr('gradientTransform', 'rotate(-35, 0.5, 0.5)');
+    grad.transition().duration(950).ease(d3.easeCubicOut)
+        .attr('gradientTransform', 'rotate(55, 0.5, 0.5)');
+}
+
+// ── IDLE PULSE ────────────────────────────────────────────────────────────────
 function pulsePath(sel, lo, hi, dur) {
     sel.transition().duration(dur).ease(d3.easeSinInOut)
         .attr('fill-opacity', hi)
@@ -353,29 +409,25 @@ function pulsePath(sel, lo, hi, dur) {
         .on('end', () => pulsePath(sel, lo, hi, dur));
 }
 
-// ── RIPPLE (recursive SVG transition on r + opacity) ─────────────────────────
+// ── RIPPLE ────────────────────────────────────────────────────────────────────
 function animateRipple(sel) {
-    sel.attr('r', 4).attr('opacity', 0.7)
-        .transition().duration(2400).ease(d3.easePolyOut.exponent(2))
-        .attr('r', 22).attr('opacity', 0)
+    sel.attr('r', 4).attr('opacity', 0.8)
+        .transition().duration(2500).ease(d3.easePolyOut.exponent(2))
+        .attr('r', 24).attr('opacity', 0)
         .on('end', () => animateRipple(sel));
 }
 
-// ── ARC ───────────────────────────────────────────────────────────────────────
+// ── FLIGHT ARC ────────────────────────────────────────────────────────────────
 function drawArc(country) {
     clearArcs();
     if (!country.coordinates) return;
 
-    const from = HOME.coordinates;
-    const to   = country.coordinates;
-
-    // Sample the great-circle line
     const line = {
         type: 'Feature',
         geometry: {
             type: 'LineString',
             coordinates: d3.range(0, 1.005, 0.005)
-                .map(t => d3.geoInterpolate(from, to)(t))
+                .map(t => d3.geoInterpolate(HOME.coordinates, country.coordinates)(t))
         }
     };
 
@@ -387,26 +439,18 @@ function drawArc(country) {
 
     const len = arcEl.node().getTotalLength();
 
-    // Dash-draw animation
     arcEl
         .attr('stroke-dasharray', `${len} ${len}`)
         .attr('stroke-dashoffset', len)
-        .transition()
-        .duration(1000)
-        .ease(d3.easeCubicOut)
+        .transition().duration(1000).ease(d3.easeCubicOut)
         .attr('stroke-dashoffset', 0);
 
-    // Plane dot traveling the arc
+    // Dot traveling along the arc
     const dot = gArcs.append('circle')
-        .attr('r', 2.5)
-        .attr('fill', 'white')
-        .attr('opacity', 0)
+        .attr('r', 2.5).attr('fill', 'white').attr('opacity', 0)
         .attr('filter', 'url(#glow-soft)');
 
-    dot.transition()
-        .delay(80)
-        .duration(1000)
-        .ease(d3.easeCubicOut)
+    dot.transition().delay(80).duration(1000).ease(d3.easeCubicOut)
         .attrTween('transform', () => {
             const node = arcEl.node();
             return t => {
@@ -416,10 +460,7 @@ function drawArc(country) {
         })
         .attr('opacity', 1)
         .on('end', function() {
-            d3.select(this)
-                .transition().duration(600)
-                .attr('opacity', 0)
-                .remove();
+            d3.select(this).transition().duration(600).attr('opacity', 0).remove();
         });
 }
 
