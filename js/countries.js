@@ -87,8 +87,8 @@ export function drawMap(world, topojson, visitedList) {
         .datum(borders)
         .attr('d', geoPath)
         .attr('fill', 'none')
-        .attr('stroke', '#181830')
-        .attr('stroke-width', 0.35)
+        .attr('stroke', '#32325a')
+        .attr('stroke-width', 0.7)
         .style('vector-effect', 'non-scaling-stroke');
 
     return { features, visitedByIso };
