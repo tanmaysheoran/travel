@@ -2,13 +2,24 @@ import { THEME } from './config.js';
 import { d3, gSphere, gGraticule, gCountries, gBorders, gMarkers } from './map.js';
 import { updateLabelTheme } from './labels.js';
 
-export let isDark = true;
+export let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const toggleBtn = document.getElementById('theme-toggle');
 
 export function initTheme() {
+    document.body.classList.toggle('light', !isDark);
+    toggleBtn.textContent = isDark ? '☀ light' : '● dark';
+
     toggleBtn.addEventListener('click', () => {
         isDark = !isDark;
+        document.body.classList.toggle('light', !isDark);
+        toggleBtn.textContent = isDark ? '☀ light' : '● dark';
+        applySVGTheme();
+        updateLabelTheme(isDark);
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        isDark = e.matches;
         document.body.classList.toggle('light', !isDark);
         toggleBtn.textContent = isDark ? '☀ light' : '● dark';
         applySVGTheme();

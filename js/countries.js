@@ -1,4 +1,6 @@
+import { THEME } from './config.js';
 import { d3, geoPath, gCountries, gBorders } from './map.js';
+import { isDark } from './theme.js';
 import { createGradients, sweepGradient } from './gradient.js';
 import { drawArc, clearArcs } from './arc.js';
 
@@ -31,7 +33,7 @@ export function drawMap(world, topojson, visitedList) {
         .attr('class', d => visitedByIso.has(String(d.id)) ? 'country visited' : 'country')
         .attr('fill', d => {
             const c = visitedByIso.get(String(d.id));
-            return c ? (c.flag_colors?.[1] ?? '#fff') : '#0f0f1c';
+            return c ? (c.flag_colors?.[1] ?? '#fff') : (isDark ? THEME.dark.land : THEME.light.land);
         })
         .attr('fill-opacity', d => visitedByIso.has(String(d.id)) ? 0.45 : 1)
         .attr('stroke', 'none')
@@ -47,7 +49,7 @@ export function drawMap(world, topojson, visitedList) {
 
             d3.select(this)
                 .interrupt()
-                .attr('fill', `url(#grad-${country.id})`)
+                .attr('fill', `url(#grad-${country.id.replace(/\s+/g, '-')})`)
                 .attr('fill-opacity', 1)
                 .attr('filter', 'url(#glow-strong)');
 
@@ -87,7 +89,7 @@ export function drawMap(world, topojson, visitedList) {
         .datum(borders)
         .attr('d', geoPath)
         .attr('fill', 'none')
-        .attr('stroke', '#181830')
+        .attr('stroke', isDark ? THEME.dark.border : THEME.light.border)
         .attr('stroke-width', 0.35)
         .style('vector-effect', 'non-scaling-stroke');
 

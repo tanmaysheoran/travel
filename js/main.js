@@ -1,6 +1,6 @@
 import { THEME } from './config.js';
 import { d3, topojson, geoPath, gSphere, gGraticule, gCountries, gBorders } from './map.js';
-import { initTheme } from './theme.js';
+import { initTheme, isDark } from './theme.js';
 import { initGlobe, getCurrentK } from './zoom.js';
 import { loadVisitedCountries, drawMap } from './countries.js';
 import { drawHomeMarker, drawCountryDots, repositionMarkers } from './markers.js';
@@ -11,15 +11,17 @@ async function init() {
     initTheme();
 
     // ── Base map layers ────────────────────────────────────────────────────────
+    const t = isDark ? THEME.dark : THEME.light;
+
     gSphere.append('path')
         .datum({ type: 'Sphere' })
-        .attr('fill', THEME.dark.sphere)
+        .attr('fill', t.sphere)
         .attr('d', geoPath);
 
     gGraticule.append('path')
         .datum(d3.geoGraticule()())
         .attr('fill', 'none')
-        .attr('stroke', THEME.dark.grat)
+        .attr('stroke', t.grat)
         .attr('stroke-width', 0.4)
         .style('vector-effect', 'non-scaling-stroke')
         .attr('d', geoPath);

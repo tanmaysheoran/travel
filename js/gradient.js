@@ -9,7 +9,7 @@ export function createGradients(visitedList) {
         const c2 = country.flag_colors?.[0] ?? c1;        // dim edge color
 
         const grad = defs.append('linearGradient')
-            .attr('id', `grad-${country.id}`)
+            .attr('id', `grad-${country.id.replace(/\s+/g, '-')}`)
             .attr('gradientUnits', 'objectBoundingBox')
             .attr('x1', 0).attr('y1', 0)
             .attr('x2', 1).attr('y2', 0)
@@ -25,7 +25,7 @@ export function createGradients(visitedList) {
 
 // Sweeps the gradient 90° across the country bounding box on hover.
 export function sweepGradient(id) {
-    const grad = d3.select(`#grad-${id}`);
+    const grad = d3.select(`#grad-${id.replace(/\s+/g, '-')}`);
     grad.attr('gradientTransform', 'rotate(-35, 0.5, 0.5)');
     grad.transition().duration(950).ease(d3.easeCubicOut)
         .attr('gradientTransform', 'rotate(55, 0.5, 0.5)');

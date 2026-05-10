@@ -18,13 +18,13 @@ export function createLabels(features, visitedByIso) {
             if (!centroid || isNaN(centroid[0])) return null;
             const name    = visitedByIso.get(String(d.id))?.name ?? COUNTRY_NAMES.get(+d.id);
             if (!name) return null;
-            const area    = geoPath.area(d);
-            const visited = visitedByIso.has(String(d.id));
-            const color   = visited
+            const area        = geoPath.area(d);
+            const visited     = visitedByIso.has(String(d.id));
+            const color       = visited
                 ? (visitedByIso.get(String(d.id)).flag_colors?.[1] ?? '#fff')
                 : null;
-            // Store feature ref so repositionLabels can recompute centroid on rotation
-            return { id: d.id, feature: d, centroid, name, area, visited, color };
+            const geoCentroid = d3.geoCentroid(d);
+            return { id: d.id, feature: d, centroid, name, area, visited, color, geoCentroid };
         })
         .filter(Boolean);
 
@@ -57,10 +57,11 @@ export function repositionLabels() {
 
 export function updateLabels(k) {
     if (!labelSelection) return;
-    const fontSize = 10 / k;
+    const fontSize = Math.max(13, 10 / k);
     labelSelection
         .style('font-size', `${fontSize}px`)
         .attr('opacity', d => {
+            if (geoPath.area(d.feature) === 0) return 0;
             if (d.visited) return k >= 1.5 ? 1 : 0;
             const tier = AREA_TIERS.find(t => d.area >= t.minArea);
             return tier && k >= tier.showAtK ? 1 : 0;

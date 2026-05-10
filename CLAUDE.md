@@ -27,6 +27,9 @@ js/
   arc.js                            # Flight arc draw/clear
   markers.js                        # Home marker + visited country dots
   countries.js                      # Load + render countries, event handlers, idle pulse
+  zoom.js                           # Scroll-to-zoom, versor drag rotation, inertia, glow filter scaling
+  labels.js                         # Country labels — zoom-tiered visibility, theme-aware fill
+  country-names.js                  # Static ISO 3166-1 numeric → English name map (used by labels.js)
   main.js                           # Entry point — wires everything, fetches world data
 countries/
   manifest.json                     # Ordered list of country IDs to show on map
@@ -48,18 +51,29 @@ gradient.js        ← map.js
 arc.js             ← config.js, map.js
 markers.js         ← config.js, map.js
 countries.js       ← map.js, gradient.js, arc.js
-main.js            ← map.js, theme.js, countries.js, markers.js
+zoom.js            ← map.js
+country-names.js   ← (no imports)
+labels.js          ← map.js, country-names.js
+main.js            ← config.js, map.js, theme.js, zoom.js, countries.js, markers.js, labels.js, arc.js
 ```
 
 D3 and topojson are imported as ESM from jsDelivr inside `map.js` and re-exported — the CDN URL is in one place only.
 
 ### Landing page flow
 
-`main.js` boots: draws sphere/graticule, fetches world topology + manifest, delegates to `drawMap()`, `drawHomeMarker()`, `drawCountryDots()`.
+`main.js` boots: draws sphere/graticule, fetches world topology + manifest, delegates to `drawMap()`, `drawHomeMarker()`, `drawCountryDots()`, `createLabels()`, then calls `initGlobe()` with a `redraw` callback that repaints all layers on every drag/zoom frame.
 
 `countries.js` handles country paths: visited countries glow (flag color), pulse idle, and on hover the gradient sweeps + a flight arc draws from home.
 
 `gradient.js` uses `gradientUnits="objectBoundingBox"` — gradient auto-scales to each country's bounding box, no screen-coordinate math needed.
+
+`zoom.js` implements versor (quaternion) drag so the globe rotates along great-circle arcs rather than independently per axis. Scroll zooms by scaling `projection.scale()` directly (not a CSS transform), so glow filter `stdDeviation` must be kept in sync via `scaleGlowFilters()`.
+
+`labels.js` shows country name labels with zoom-tiered visibility (`AREA_TIERS`): visited-country labels appear at `k ≥ 1.5`; unvisited labels appear only for large countries at low zoom or small countries at high zoom. Font size is `10 / k` to stay constant in geographic size. To add a label for a country that isn't in `country-names.js`, add its ISO 3166-1 numeric code there.
+
+**SVG layer order** (bottom → top, all inside `#g-map`): sphere → graticule → countries → borders → labels → arcs. Markers (`gOverlay`) sit outside `#g-map` and are repositioned explicitly on each frame.
+
+**Resize**: the page reloads on `window.resize` to recompute projection dimensions — no responsive reflow.
 
 ### Country detail page (`countries/{id}/index.html`)
 
@@ -86,7 +100,8 @@ Each city is a full-screen sticky parallax section:
    ```
    - `iso_numeric` — ISO 3166-1 numeric code (D3/TopoJSON uses this to find the country)
    - `coordinates` — capital city `[lng, lat]`, used as arc endpoint and dot position
-   - `flag_colors[1]` — primary fill/glow/gradient color on the map
+   - `flag_colors` — array of any length; `flag_colors[1]` is the primary fill/glow/gradient color on the map
+   - Country directory names use spaces (e.g. `countries/south korea/`), matching the display name
 3. Create `countries/{id}/index.html` following the sticky-parallax pattern
 4. Add assets to `countries/{id}/content/`
 
