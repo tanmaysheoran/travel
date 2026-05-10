@@ -49,7 +49,7 @@ export function drawMap(world, topojson, visitedList) {
 
             d3.select(this)
                 .interrupt()
-                .attr('fill', `url(#grad-${country.id})`)
+                .attr('fill', `url(#grad-${country.id.replace(/\s+/g, '-')})`)
                 .attr('fill-opacity', 1)
                 .attr('filter', 'url(#glow-strong)');
 
