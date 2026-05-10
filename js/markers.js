@@ -53,15 +53,26 @@ export function drawCountryDots(visitedList) {
     });
 }
 
+// Returns true if [lng, lat] is on the visible front hemisphere.
+// d3.geoDistance gives great-circle distance in radians; front hemisphere = within π/2 of view center.
+function isVisible(lng, lat) {
+    const r = projection.rotate();
+    const center = [-r[0], -r[1]];
+    return d3.geoDistance([lng, lat], center) < Math.PI / 2;
+}
+
 // Called on every projection change to keep markers at the correct screen position.
 export function repositionMarkers() {
     gMarkers.selectAll('g[data-lng]').each(function() {
         const el  = d3.select(this);
         const lng = +el.attr('data-lng');
         const lat = +el.attr('data-lat');
-        const xy  = projection([lng, lat]);
-        // Push off-screen if the point is on the back hemisphere (projection returns null)
-        el.attr('transform', xy ? `translate(${xy})` : 'translate(-9999,-9999)');
+        if (!isVisible(lng, lat)) {
+            el.attr('transform', 'translate(-9999,-9999)');
+            return;
+        }
+        const xy = projection([lng, lat]);
+        el.attr('transform', `translate(${xy})`);
     });
 }
 
