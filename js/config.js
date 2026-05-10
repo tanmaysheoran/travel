@@ -6,7 +6,7 @@ export const HOME = {
 // SVG-attribute colors per theme (CSS vars handle HTML elements automatically)
 export const THEME = {
     dark: {
-        sphere:    '#1c3154',
+        sphere:    '#0000005b',
         land:      '#212130',
         border:    'rgba(60,70,120,0.5)',
         grat:      'rgba(255,255,255,0.04)',
@@ -15,7 +15,7 @@ export const THEME = {
         homeLabel: 'rgba(255,255,255,0.55)',
     },
     light: {
-        sphere:    '#a8c8e0',
+        sphere:    '#eeececff',
         land:      '#dcdcf0',
         border:    '#9090b8',
         grat:      'rgba(0,0,0,0.07)',
@@ -24,3 +24,6 @@ export const THEME = {
         homeLabel: 'rgba(0,0,0,0.28)',
     },
 };
+
+
+//        sphere:    '#a8c8e0',
