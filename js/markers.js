@@ -1,9 +1,11 @@
 import { HOME, THEME } from './config.js';
 import { d3, projection, gMarkers } from './map.js';
+import { isDark } from './theme.js';
 
 export function drawHomeMarker() {
     const xy = projection(HOME.coordinates);
     if (!xy) return;
+    const t = isDark ? THEME.dark : THEME.light;
 
     const g = gMarkers.append('g')
         .attr('transform', `translate(${xy})`)
@@ -12,16 +14,16 @@ export function drawHomeMarker() {
 
     g.append('circle').attr('class', 'home-ring')
         .attr('r', 14).attr('fill', 'none')
-        .attr('stroke', THEME.dark.homeRing).attr('stroke-width', 1);
+        .attr('stroke', t.homeRing).attr('stroke-width', 1);
 
     g.append('circle').attr('class', 'home-dot')
         .attr('r', 2.8)
-        .attr('fill', THEME.dark.homeDot)
+        .attr('fill', t.homeDot)
         .attr('filter', 'url(#glow-soft)');
 
     g.append('text').attr('class', 'home-label')
         .attr('x', 10).attr('y', -10)
-        .attr('fill', THEME.dark.homeLabel)
+        .attr('fill', t.homeLabel)
         .attr('font-size', '9px')
         .attr('letter-spacing', '0.25em')
         .text(HOME.label);
